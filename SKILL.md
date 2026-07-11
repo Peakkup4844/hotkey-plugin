@@ -294,6 +294,11 @@ Java 21+ required (Maven 4 + JDK 24 ทดสอบแล้ว — ใช้ไ
   (flat list `hotkeys` เก็บครบทุก entry ไว้ให้ admin list/info) — ถ้าลืม index ปุ่มจะกดไม่ติด
   → entry ที่มีหลาย key ถูก add เข้า index **ทุก key** (loop `def.keys()`) — def เดียวโผล่ในหลาย bucket ได้
 - **`ArrayList valid` ถูก alloc เฉพาะตอนมี hotkey ผูกจริง** (lazy) ห้ามเปลี่ยนกลับไป stream ทุก packet
+- **ลำดับ gate ใน `handleTrigger`: `bound.isEmpty` → hard floor → permission scan → cooldown → dispatch**
+  hard floor อยู่**ก่อน** permission scan ตั้งใจ (floor เป็น O(1) zero-alloc, drop flood ก่อนจะ alloc `valid`/
+  เรียก `hasPermission`). ปลอดภัยเพราะ `lastDispatch` เขียนเฉพาะตอน dispatch จริง → ผู้เล่นที่ไม่มีสิทธิ์
+  `lastDispatch=0` ผ่าน floor เสมอ ลำดับนี้ไม่เปลี่ยนผลว่า command จะรันไหม แค่ลด work ตอนโดน flood
+  → **ห้ามเลื่อน permission scan ขึ้นก่อน floor** (จะทำให้ flood กลับมา alloc/เช็ค perm ทุก packet)
 
 ---
 

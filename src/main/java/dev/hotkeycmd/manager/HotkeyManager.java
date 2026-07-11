@@ -56,8 +56,21 @@ public class HotkeyManager {
         List<HotkeyDefinition> bound = plugin.getConfigManager().getHotkeysFor(trigger);
         if (bound.isEmpty()) return;
 
-        // Keep only the ones this player is allowed to use. A list is allocated only when something
-        // is actually bound to the key — the common no-binding case already returned above.
+        UUID uuid = player.getUniqueId();
+        long now  = System.currentTimeMillis();
+
+        // Hard floor FIRST — the cheapest gate, zero allocation. Always enforced, even when
+        // global-cooldown is disabled: silently drops anything faster than MIN_DISPATCH_INTERVAL_MS
+        // so a client holding/flooding a bound key can't turn into unbounded command dispatch on the
+        // main/region thread. Checking it before the permission scan below means a flood never even
+        // allocates a list or runs a permission check. (lastDispatch is only written on a real
+        // dispatch, so a never-permitted player keeps lastDispatch=0 and always passes here — this
+        // ordering changes no dispatch outcome, it only skips wasted work under a flood.)
+        long lastDisp = lastDispatch.getOrDefault(uuid, 0L);
+        if (now - lastDisp < MIN_DISPATCH_INTERVAL_MS) return;
+
+        // Keep only the hotkeys this player may use. A list is allocated only for a real keypress
+        // that passed the floor — the common no-binding case and floods already returned above.
         List<HotkeyDefinition> valid = null;
         for (HotkeyDefinition hk : bound) {
             if (hk.permission().isEmpty() || player.hasPermission(hk.permission())) {
@@ -66,15 +79,6 @@ public class HotkeyManager {
             }
         }
         if (valid == null) return;
-
-        UUID uuid = player.getUniqueId();
-        long now  = System.currentTimeMillis();
-
-        // Hard floor — always enforced, even when global-cooldown is disabled. Silently
-        // drops anything faster than MIN_DISPATCH_INTERVAL_MS so a packet flood can't turn
-        // into unbounded command dispatch / scheduled tasks on the main/region thread.
-        long lastDisp = lastDispatch.getOrDefault(uuid, 0L);
-        if (now - lastDisp < MIN_DISPATCH_INTERVAL_MS) return;
 
         // Cooldown check — done on Netty thread; ConcurrentHashMap guarantees atomicity
         double cooldownSec = plugin.getConfigManager().getGlobalCooldown();
@@ -101,9 +105,12 @@ public class HotkeyManager {
         // Passed every gate — this is a real dispatch; record it for the hard floor.
         lastDispatch.put(uuid, now);
 
-        // Cancel the underlying game action for any hotkey that requests it
-        // Must happen here on the Netty thread — cannot be deferred
-        boolean shouldCancel = valid.stream().anyMatch(HotkeyDefinition::cancelAction);
+        // Cancel the underlying game action if ANY matched hotkey requests it.
+        // Must happen here on the Netty thread — cannot be deferred.
+        boolean shouldCancel = false;
+        for (HotkeyDefinition def : valid) {
+            if (def.cancelAction()) { shouldCancel = true; break; }
+        }
         if (shouldCancel) cancelPacket.run();
 
         if (plugin.getConfigManager().isDebug()) {
