@@ -147,3 +147,8 @@ dependency needed by the Paper API.
 ## Status
 
 Beta. Feedback and bug reports are welcome via the issue tracker.
+
+## License
+
+Licensed under the [GNU General Public License v3.0](LICENSE). You may use, modify, and redistribute
+this plugin, but any distributed derivative must remain open source under the same license.
