@@ -1,0 +1,133 @@
+# =============================================
+#  HotkeyCommands  –  config.yml
+# =============================================
+
+# Language file to load  →  lang_<locale>.yml  inside the plugin folder
+# Bundled: en (English, default), zh (简体中文), th (ไทย)
+# An unknown locale falls back to English. Add your own by dropping a lang_<code>.yml in this folder.
+locale: en
+
+# Cooldown (seconds) shared across all hotkeys per player  |  0 = disabled
+# Note: even with 0, a hard 50ms floor between command dispatches always applies
+# (anti-flood / DoS protection). It cannot be turned off from config.
+global-cooldown: 1.5
+
+# Print trigger info to console
+debug: false
+
+# Skip Bedrock players connecting through Geyser/Floodgate.
+# Their controls (F / Q / hotbar) don't map cleanly to Java keybinds and would fire
+# hotkeys unexpectedly, so they are ignored by default.
+# Detection works only with Floodgate (Bedrock UUIDs have most-significant-bits = 0).
+# With Geyser in pure proxy mode, Bedrock players look like Java players and cannot be skipped.
+ignore-bedrock: true
+
+# ------------------------------------------------------------------
+# Hotkey definitions
+#
+# IMPORTANT — which keys can be used:
+#   Minecraft only tells the server about a FIXED set of key actions. Ordinary
+#   letter keys (L, K, G, R, C, …) are handled entirely by the client and are
+#   NEVER sent to the server, so they can't be turned into hotkeys without a
+#   client-side mod. Using an unsupported name makes the plugin skip that entry
+#   (with a warning in console) and the key will simply do nothing.
+#
+# Available key identifiers (the complete list):
+#   SWAP_HAND          –  F
+#   SNEAK_SWAP_HAND    –  Shift + F
+#   DROP               –  Q
+#   SNEAK_DROP         –  Shift + Q
+#   DROP_STACK         –  Ctrl + Q            (drop the whole stack)
+#   SNEAK_DROP_STACK   –  Shift + Ctrl + Q
+#   HOTBAR_1 … HOTBAR_9              –  Number key 1–9 (or scroll wheel)
+#   SNEAK_HOTBAR_1 … SNEAK_HOTBAR_9  –  Shift + number key 1–9
+#
+# key / keys  (one entry can be bound to several keys):
+#   key: SWAP_HAND                 – single key
+#   keys: [SWAP_HAND, DROP]        – any of these keys triggers this hotkey
+#
+# command / commands  (one entry can run several commands, in order):
+#   command: "/spawn"              – single command
+#   commands:                      – all of these run on trigger
+#     - "/spawn"
+#     - "/heal"
+#   (Leave commands empty + cancel-action: true to only BLOCK the vanilla action.)
+#
+# cancel-action:
+#   true  – cancel the vanilla game action (item won't swap / drop / slot won't change)
+#   false – vanilla action still happens AND the command runs
+#
+# run-as:
+#   PLAYER  – command runs with the player's own permissions
+#   CONSOLE – command runs as console (full server privileges).
+#             SECURITY: a CONSOLE hotkey MUST have a non-empty 'permission'.
+#             Without one it would let any player run console commands, so the
+#             plugin refuses to load such an entry (see console on startup).
+# ------------------------------------------------------------------
+hotkeys:
+
+  warp_menu:
+    key: SNEAK_SWAP_HAND        # Shift + F
+    command: "/warps"
+    permission: hkcmd.key.warp_menu
+    enabled: true
+    cancel-action: true
+    run-as: PLAYER
+
+  go_home:
+    key: SNEAK_DROP             # Shift + Q
+    command: "/home"
+    permission: hkcmd.key.go_home
+    enabled: true
+    cancel-action: true
+    run-as: PLAYER
+
+  # Example – open kit GUI on Shift+5, no cancel so slot still switches
+  # kit_menu:
+  #   key: SNEAK_HOTBAR_5
+  #   command: "/kit"
+  #   permission: hkcmd.key.kit_menu
+  #   enabled: false
+  #   cancel-action: false
+  #   run-as: PLAYER
+
+  # Example – open the shop on Ctrl+Q (cancel so the stack isn't actually dropped)
+  # shop_menu:
+  #   key: DROP_STACK
+  #   command: "/shop"
+  #   permission: hkcmd.key.shop_menu
+  #   enabled: false
+  #   cancel-action: true
+  #   run-as: PLAYER
+
+  # Example – MULTI-KEY: same command fires on F OR Q (either key triggers it)
+  # spawn_multikey:
+  #   keys: [SWAP_HAND, DROP]
+  #   command: "/spawn"
+  #   permission: hkcmd.key.spawn_multikey
+  #   enabled: false
+  #   cancel-action: true
+  #   run-as: PLAYER
+
+  # Example – MULTI-COMMAND: one keypress runs several commands, top to bottom
+  # buff_combo:
+  #   key: SNEAK_HOTBAR_9
+  #   commands:
+  #     - "/heal"
+  #     - "/feed"
+  #     - "/msg &aBuffs applied!"
+  #   permission: hkcmd.key.buff_combo
+  #   enabled: false
+  #   cancel-action: false
+  #   run-as: PLAYER
+
+  # Example – BOTH: multiple keys AND multiple commands in one entry
+  # kit_and_warp:
+  #   keys: [SNEAK_HOTBAR_1, SNEAK_HOTBAR_2]
+  #   commands:
+  #     - "/kit starter"
+  #     - "/warp pvp"
+  #   permission: hkcmd.key.kit_and_warp
+  #   enabled: false
+  #   cancel-action: true
+  #   run-as: PLAYER

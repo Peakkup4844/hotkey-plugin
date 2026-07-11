@@ -1,0 +1,44 @@
+# =============================================
+#  HotkeyCommands  –  lang_en.yml  (English)
+#  Color codes: use & followed by a Minecraft color code
+#  Placeholders are shown inline below each key
+# =============================================
+
+prefix: "&8[&6HotKey&8] &r"
+
+# Sent when a player lacks the required permission for a hotkey  (currently silent — not shown in-game)
+no-permission: "{prefix}&cYou don't have permission to use this hotkey"
+
+# Sent when a player triggers a hotkey before the cooldown expires
+# Placeholder: {remaining} = seconds left (e.g. "0.8")
+on-cooldown: "{prefix}&eWait &f{remaining}s &ebefore using it again"
+
+# Sent when a hotkey entry has enabled: false
+hotkey-disabled: "{prefix}&7This hotkey is disabled"
+
+# --- Admin messages ---
+
+reload-success: "{prefix}&aConfig reloaded successfully"
+reload-fail: "{prefix}&cConfig reload failed — see console for details"
+
+list-header: "{prefix}&eAll hotkeys:"
+# Placeholders: {id}, {key}, {command}, {status}
+list-entry: "  &7» &f{id} &8| &e{key} &8→ &a{command} &8[{status}]"
+list-status-enabled: "&aon"
+list-status-disabled: "&coff"
+no-hotkeys: "{prefix}&7No hotkeys registered yet"
+
+# Placeholders: {id}
+info-header: "{prefix}&eHotkey info &f{id}&e:"
+# Placeholders for info lines: {key}, {command}, {permission}, {cancel}, {run_as}, {status}
+info-key: "  &7Key&8: &f{key}"
+info-command: "  &7Command&8: &f{command}"
+info-permission: "  &7Permission&8: &f{permission}"
+info-cancel: "  &7Cancel Action&8: &f{cancel}"
+info-run-as: "  &7Run As&8: &f{run_as}"
+info-status: "  &7Status&8: {status}"
+# Placeholder: {id}
+info-not-found: "{prefix}&cHotkey &f'{id}' &cnot found"
+
+admin-no-permission: "{prefix}&cYou don't have permission to use this command"
+usage: "{prefix}&7Usage&8: &f/hkcmd <reload|list|info <id>>"

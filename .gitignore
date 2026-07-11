@@ -1,0 +1,44 @@
+# ===== Build output =====
+target/
+dependency-reduced-pom.xml
+*.jar
+!.mvn/wrapper/maven-wrapper.jar
+
+# ===== Maven wrapper (keep scripts, ignore downloaded jar) =====
+.mvn/wrapper/maven-wrapper.properties
+
+# ===== IDEs =====
+# IntelliJ IDEA
+.idea/
+*.iml
+*.ipr
+*.iws
+out/
+
+# Eclipse
+.settings/
+.classpath
+.project
+.factorypath
+bin/
+
+# NetBeans
+nbproject/private/
+nbbuild/
+nbdist/
+
+# VS Code
+.vscode/
+
+# ===== OS junk =====
+.DS_Store
+.DS_Store?
+._*
+Thumbs.db
+Desktop.ini
+
+# ===== Logs / temp =====
+*.log
+*.tmp
+hs_err_pid*.log
+replay_pid*.log

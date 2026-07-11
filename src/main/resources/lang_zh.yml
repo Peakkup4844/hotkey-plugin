@@ -1,0 +1,44 @@
+# =============================================
+#  HotkeyCommands  –  lang_zh.yml  (简体中文 / Simplified Chinese)
+#  颜色代码：使用 & 加上 Minecraft 颜色代码
+#  占位符标注在每个键的下方
+# =============================================
+
+prefix: "&8[&6HotKey&8] &r"
+
+# 当玩家缺少使用该快捷键所需的权限时发送（目前为静默，不在游戏内显示）
+no-permission: "{prefix}&c你没有权限使用此快捷键"
+
+# 当玩家在冷却结束前触发快捷键时发送
+# 占位符：{remaining} = 剩余秒数（例如 "0.8"）
+on-cooldown: "{prefix}&e请等待 &f{remaining}s &e后再次使用"
+
+# 当快捷键条目 enabled: false 时发送
+hotkey-disabled: "{prefix}&7此快捷键已被禁用"
+
+# --- 管理员消息 ---
+
+reload-success: "{prefix}&a配置已成功重载"
+reload-fail: "{prefix}&c配置重载失败 — 请查看控制台了解详情"
+
+list-header: "{prefix}&e所有快捷键："
+# 占位符：{id}, {key}, {command}, {status}
+list-entry: "  &7» &f{id} &8| &e{key} &8→ &a{command} &8[{status}]"
+list-status-enabled: "&a开"
+list-status-disabled: "&c关"
+no-hotkeys: "{prefix}&7尚未注册任何快捷键"
+
+# 占位符：{id}
+info-header: "{prefix}&e快捷键信息 &f{id}&e："
+# info 行的占位符：{key}, {command}, {permission}, {cancel}, {run_as}, {status}
+info-key: "  &7按键&8: &f{key}"
+info-command: "  &7命令&8: &f{command}"
+info-permission: "  &7权限&8: &f{permission}"
+info-cancel: "  &7取消原动作&8: &f{cancel}"
+info-run-as: "  &7执行身份&8: &f{run_as}"
+info-status: "  &7状态&8: {status}"
+# 占位符：{id}
+info-not-found: "{prefix}&c未找到快捷键 &f'{id}'"
+
+admin-no-permission: "{prefix}&c你没有权限使用此命令"
+usage: "{prefix}&7用法&8: &f/hkcmd <reload|list|info <id>>"

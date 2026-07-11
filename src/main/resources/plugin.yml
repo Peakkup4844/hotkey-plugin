@@ -1,0 +1,25 @@
+name: HotkeyCommands
+version: '${project.version}'
+main: dev.hotkeycmd.HotkeyPlugin
+api-version: "1.21"
+description: Execute server commands via configurable in-game hotkeys
+authors: [ YourName ]
+folia-supported: true
+
+depend:
+  - packetevents
+
+commands:
+  hkcmd:
+    description: HotkeyCommands admin command
+    usage: /hkcmd <reload|list|info <id>>
+    permission: hkcmd.admin
+    aliases: [ hotkeycmd, hkc ]
+
+permissions:
+  hkcmd.admin:
+    description: Access to /hkcmd admin sub-commands
+    default: op
+  hkcmd.key.*:
+    description: Access to every configured hotkey
+    default: false

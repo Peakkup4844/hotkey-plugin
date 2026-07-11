@@ -1,0 +1,44 @@
+# =============================================
+#  HotkeyCommands  –  lang_th.yml  (Thai)
+#  Color codes: use & followed by Minecraft color code
+#  Placeholders shown inline below each key
+# =============================================
+
+prefix: "&8[&6HotKey&8] &r"
+
+# Sent when player lacks the required permission for a hotkey  (silent = no message)
+no-permission: "{prefix}&cคุณไม่มีสิทธิ์ใช้งาน hotkey นี้"
+
+# Sent when player triggers a hotkey before cooldown expires
+# Placeholder: {remaining} = seconds left (e.g. "0.8")
+on-cooldown: "{prefix}&eรอ &f{remaining}s &eก่อนกดอีกครั้ง"
+
+# Sent when a hotkey entry has enabled: false
+hotkey-disabled: "{prefix}&7Hotkey นี้ถูกปิดใช้งาน"
+
+# --- Admin messages ---
+
+reload-success: "{prefix}&aโหลด config ใหม่เรียบร้อย"
+reload-fail: "{prefix}&cโหลด config ล้มเหลว — ดูรายละเอียดใน console"
+
+list-header: "{prefix}&eรายการ Hotkey ทั้งหมด:"
+# Placeholders: {id}, {key}, {command}, {status}
+list-entry: "  &7» &f{id} &8| &e{key} &8→ &a{command} &8[{status}]"
+list-status-enabled: "&aเปิด"
+list-status-disabled: "&cปิด"
+no-hotkeys: "{prefix}&7ยังไม่มี hotkey ที่ลงทะเบียน"
+
+# Placeholders: {id}
+info-header: "{prefix}&eข้อมูล Hotkey &f{id}&e:"
+# Placeholders for info lines: {key}, {command}, {permission}, {cancel}, {run_as}, {status}
+info-key: "  &7Key&8: &f{key}"
+info-command: "  &7Command&8: &f{command}"
+info-permission: "  &7Permission&8: &f{permission}"
+info-cancel: "  &7Cancel Action&8: &f{cancel}"
+info-run-as: "  &7Run As&8: &f{run_as}"
+info-status: "  &7Status&8: {status}"
+# Placeholder: {id}
+info-not-found: "{prefix}&cไม่พบ hotkey &f'{id}'"
+
+admin-no-permission: "{prefix}&cคุณไม่มีสิทธิ์ใช้คำสั่งนี้"
+usage: "{prefix}&7การใช้งาน&8: &f/hkcmd <reload|list|info <id>>"
