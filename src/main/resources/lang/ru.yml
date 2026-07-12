@@ -1,0 +1,44 @@
+# =============================================
+#  HotkeyCommands  –  lang/ru.yml  (Русский / Russian)
+#  Цветовые коды: используйте & и код цвета Minecraft
+#  Плейсхолдеры указаны под каждым ключом
+# =============================================
+
+prefix: "&8[&6HotKey&8] &r"
+
+# Отправляется, когда у игрока нет нужного права для горячей клавиши  (сейчас без сообщения — в игре не показывается)
+no-permission: "{prefix}&cУ вас нет прав на использование этой горячей клавиши"
+
+# Отправляется, когда игрок активирует горячую клавишу до окончания перезарядки
+# Плейсхолдер: {remaining} = оставшиеся секунды (например "0.8")
+on-cooldown: "{prefix}&eПодождите &f{remaining}s &eперед повторным использованием"
+
+# Отправляется, когда у записи горячей клавиши стоит enabled: false
+hotkey-disabled: "{prefix}&7Эта горячая клавиша отключена"
+
+# --- Сообщения администратора ---
+
+reload-success: "{prefix}&aКонфигурация успешно перезагружена"
+reload-fail: "{prefix}&cНе удалось перезагрузить конфигурацию — подробности в консоли"
+
+list-header: "{prefix}&eВсе горячие клавиши:"
+# Плейсхолдеры: {id}, {key}, {command}, {status}
+list-entry: "  &7» &f{id} &8| &e{key} &8→ &a{command} &8[{status}]"
+list-status-enabled: "&aвкл"
+list-status-disabled: "&cвыкл"
+no-hotkeys: "{prefix}&7Горячие клавиши ещё не зарегистрированы"
+
+# Плейсхолдер: {id}
+info-header: "{prefix}&eИнформация о горячей клавише &f{id}&e:"
+# Плейсхолдеры строк info: {key}, {command}, {permission}, {cancel}, {run_as}, {status}
+info-key: "  &7Клавиша&8: &f{key}"
+info-command: "  &7Команда&8: &f{command}"
+info-permission: "  &7Право&8: &f{permission}"
+info-cancel: "  &7Отмена действия&8: &f{cancel}"
+info-run-as: "  &7Выполнять как&8: &f{run_as}"
+info-status: "  &7Статус&8: {status}"
+# Плейсхолдер: {id}
+info-not-found: "{prefix}&cГорячая клавиша &f'{id}' &cне найдена"
+
+admin-no-permission: "{prefix}&cУ вас нет прав на использование этой команды"
+usage: "{prefix}&7Использование&8: &f/hkcmd <reload|list|info <id>>"

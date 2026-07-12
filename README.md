@@ -20,9 +20,9 @@ Built on [PacketEvents](https://github.com/retrooper/packetevents) and works on
 - ⛓️ **Multi-command** — one keypress can run several commands in order (`commands: [...]`).
 - 🚫 **Cancel the vanilla action** — e.g. press Ctrl+Q to open a shop *without* dropping your stack.
 - 👤 **Run as player or console** — per hotkey (`run-as: PLAYER | CONSOLE`); use `{player}` in a
-  command to insert the triggering player's name (handy for console-run commands like `/heal {player}`).
-- 🌍 **Multi-language** — English (default), 简体中文, ไทย, all extracted into a `lang/` folder you can
-  edit; unknown locale falls back to English.
+  command to insert the triggering player's name (handy for console-run commands like `heal {player}`).
+- 🌍 **Multi-language** — English (default), 简体中文, ไทย, Español, Русский, all extracted into a
+  `lang/` folder you can edit; unknown locale falls back to English.
 - 🛡️ **Anti-flood** — global cooldown plus a hard 50 ms dispatch floor that can't be disabled.
 - 🧵 **Folia-aware** — commands dispatch on the correct region/main thread automatically.
 - ♻️ **Safe config upgrades** — new settings are merged into an edited `config.yml` without
@@ -55,7 +55,7 @@ Built on [PacketEvents](https://github.com/retrooper/packetevents) and works on
 ## Configuration
 
 ```yaml
-locale: en              # en | zh | th | <custom>
+locale: en              # en | zh | th | es | ru | <custom>
 global-cooldown: 1.5    # seconds shared across all hotkeys per player (0 = off)
 debug: false
 ignore-bedrock: true    # skip Bedrock players (Floodgate only)
@@ -63,7 +63,7 @@ ignore-bedrock: true    # skip Bedrock players (Floodgate only)
 hotkeys:
   warp_menu:
     key: SNEAK_SWAP_HAND       # Shift + F
-    command: "/warps"
+    command: "warps"           # no leading slash — added at runtime
     permission: hkcmd.key.warp_menu
     enabled: true
     cancel-action: true        # don't actually swap hands
@@ -73,8 +73,8 @@ hotkeys:
   buff_combo:
     keys: [SNEAK_HOTBAR_1, SNEAK_HOTBAR_2]
     commands:
-      - "/heal"
-      - "/feed"
+      - "heal"
+      - "feed"
     permission: hkcmd.key.buff_combo
     enabled: true
     cancel-action: false
@@ -91,8 +91,9 @@ hotkeys:
 | `HOTBAR_1` … `HOTBAR_9` | Number 1–9 / scroll | | `SNEAK_HOTBAR_1` … `SNEAK_HOTBAR_9` | Shift + 1–9 |
 
 `key` / `keys` and `command` / `commands` each accept either a single value or a list.
-Leaving `commands` empty with `cancel-action: true` makes a hotkey that only **blocks** the
-vanilla action and runs nothing.
+Write commands **without a leading slash** (`warps`, not `/warps`) — it's handled at runtime
+(a stray `/` is tolerated). Leaving `commands` empty with `cancel-action: true` makes a hotkey
+that only **blocks** the vanilla action and runs nothing.
 
 ### How the command runs (`run-as`)
 
@@ -102,13 +103,13 @@ vanilla action and runs nothing.
 | `CONSOLE` | Runs **as the server console** with full privileges, bypassing the player's permissions — use it to let players trigger commands they normally couldn't. A CONSOLE hotkey **must** set a `permission` (the permission to *use the hotkey*), or it is refused at load. |
 
 Use **`{player}`** anywhere in a command to insert the triggering player's name — mainly so a
-console command can target them, e.g. `command: "/heal {player}"`.
+console command can target them, e.g. `command: "heal {player}"`.
 
 ### Language files
 
-The `en`, `zh`, and `th` language files are written into a **`lang/` folder** inside the plugin
-directory on first run. Edit any of them, then pick one with `locale:` in `config.yml`. Drop your
-own `lang/<code>.yml` to add a language; an unknown locale falls back to `lang/en.yml`.
+The `en`, `zh`, `th`, `es`, and `ru` language files are written into a **`lang/` folder** inside the
+plugin directory on first run. Edit any of them, then pick one with `locale:` in `config.yml`. Drop
+your own `lang/<code>.yml` to add a language; an unknown locale falls back to `lang/en.yml`.
 
 ---
 

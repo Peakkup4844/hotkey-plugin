@@ -1,0 +1,44 @@
+# =============================================
+#  HotkeyCommands  –  lang/es.yml  (Español / Spanish)
+#  Códigos de color: usa & seguido de un código de color de Minecraft
+#  Los marcadores de posición se muestran debajo de cada clave
+# =============================================
+
+prefix: "&8[&6HotKey&8] &r"
+
+# Enviado cuando un jugador no tiene el permiso requerido para una tecla rápida  (actualmente silencioso — no se muestra en el juego)
+no-permission: "{prefix}&cNo tienes permiso para usar esta tecla rápida"
+
+# Enviado cuando un jugador activa una tecla rápida antes de que expire el enfriamiento
+# Marcador: {remaining} = segundos restantes (p. ej. "0.8")
+on-cooldown: "{prefix}&eEspera &f{remaining}s &eantes de usarla de nuevo"
+
+# Enviado cuando una entrada de tecla rápida tiene enabled: false
+hotkey-disabled: "{prefix}&7Esta tecla rápida está desactivada"
+
+# --- Mensajes de administrador ---
+
+reload-success: "{prefix}&aConfiguración recargada correctamente"
+reload-fail: "{prefix}&cError al recargar la configuración — revisa la consola para más detalles"
+
+list-header: "{prefix}&eTodas las teclas rápidas:"
+# Marcadores: {id}, {key}, {command}, {status}
+list-entry: "  &7» &f{id} &8| &e{key} &8→ &a{command} &8[{status}]"
+list-status-enabled: "&aact"
+list-status-disabled: "&cdesact"
+no-hotkeys: "{prefix}&7Aún no hay teclas rápidas registradas"
+
+# Marcador: {id}
+info-header: "{prefix}&eInformación de la tecla rápida &f{id}&e:"
+# Marcadores de las líneas info: {key}, {command}, {permission}, {cancel}, {run_as}, {status}
+info-key: "  &7Tecla&8: &f{key}"
+info-command: "  &7Comando&8: &f{command}"
+info-permission: "  &7Permiso&8: &f{permission}"
+info-cancel: "  &7Cancelar acción&8: &f{cancel}"
+info-run-as: "  &7Ejecutar como&8: &f{run_as}"
+info-status: "  &7Estado&8: {status}"
+# Marcador: {id}
+info-not-found: "{prefix}&cTecla rápida &f'{id}' &cno encontrada"
+
+admin-no-permission: "{prefix}&cNo tienes permiso para usar este comando"
+usage: "{prefix}&7Uso&8: &f/hkcmd <reload|list|info <id>>"

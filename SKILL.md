@@ -35,7 +35,9 @@ hotkey-plugin/
         └── lang/                       ← extracted to plugins/HotkeyCommands/lang/ on first run
             ├── en.yml                  ← English (default locale)
             ├── zh.yml                  ← 简体中文
-            └── th.yml                  ← ไทย
+            ├── th.yml                  ← ไทย
+            ├── es.yml                  ← Español
+            └── ru.yml                  ← Русский
 ```
 
 ---
@@ -160,14 +162,14 @@ PacketEvents process บน Netty thread → ทุก command dispatch / messag
 
 ```yaml
 # config.yml
-locale: en             # en (default) | zh | th | <custom>  — unknown → fallback en
+locale: en             # en (default) | zh | th | es | ru | <custom>  — unknown → fallback en
 global-cooldown: 1.5   # วินาที, 0 = ปิด (มี hard floor 50ms บังคับเสมอ)
 debug: false
 ignore-bedrock: true   # ข้ามผู้เล่น Bedrock (Geyser/Floodgate) — default true
 hotkeys:
   <id>:
     key: <KeyTrigger>       # single — หรือใช้ `keys: [A, B]` ผูกหลายปุ่มใน entry เดียว
-    command: "/..."         # single — หรือใช้ `commands: ["/a", "/b"]` รันหลายคำสั่ง
+    command: "..."          # single — หรือใช้ `commands: ["a", "b"]` รันหลายคำสั่ง (ไม่ต้องใส่ /)
     permission: "hkcmd.key.<id>"
     enabled: true
     cancel-action: true     # per-hotkey
@@ -179,6 +181,7 @@ hotkeys:
 - `command`/`commands` → parse เป็น `List<String>` (ตัด blank ออก); **empty list ได้** = hotkey ที่ cancel action เฉย ๆ ไม่รันคำสั่ง
 - `HotkeyDefinition` เก็บ `List<KeyTrigger> keys` + `List<String> commands` (ทั้งคู่ `List.copyOf` = immutable ตาม invariant)
 - `HotkeyManager` dispatch: วน `valid` → วน `def.commands()` รันทุกคำสั่งตามลำดับ; `shouldCancel = anyMatch(cancelAction)`
+  - **Leading slash**: config เขียนคำสั่ง**ไม่ต้องมี `/`** — dispatch ตัด `/` นำหน้าออกถ้าเผลอใส่ (`rawCmd = startsWith("/") ? substring(1) : cmd`) เพราะทั้ง `performCommand`/`dispatchCommand` รับแบบไม่มี `/`
 - 1 entry ที่มีหลาย key ถูก index **ซ้ำใต้ทุก key** ใน `byKey` (def object เดียวกัน)
 
 ### Config migration (ConfigManager.migrateConfig — รันทุก load / reload)
@@ -206,9 +209,9 @@ Upgrade config เก่าที่ผู้ใช้แก้ไว้แบ�
 ## Lang Schema
 
 ไฟล์ bundle อยู่ใน `src/main/resources/lang/`: `en.yml` (English, **default**), `zh.yml` (简体中文),
-`th.yml` (ไทย) — ทุกไฟล์มี key ชุดเดียวกัน ต้อง sync กันเมื่อเพิ่ม/แก้ message
+`th.yml` (ไทย), `es.yml` (Español), `ru.yml` (Русский) — ทุกไฟล์มี key ชุดเดียวกัน ต้อง sync กันเมื่อเพิ่ม/แก้ message
 
-**Runtime layout**: `LangManager.load` แตกไฟล์ทุก locale (`BUNDLED_LOCALES = {en,zh,th}`) ลงโฟลเดอร์
+**Runtime layout**: `LangManager.load` แตกไฟล์ทุก locale (`BUNDLED_LOCALES = {en,zh,th,es,ru}`) ลงโฟลเดอร์
 `plugins/HotkeyCommands/lang/` ตอนรันครั้งแรก (ไม่ทับไฟล์ที่ user แก้แล้ว) เพื่อให้เห็น/แก้ได้ทุกภาษา แล้ว
 โหลด `lang/<locale>.yml` ตาม config — ถ้าไม่มี fallback เป็น `lang/en.yml`
 - **Migration**: `migrateFlatLangFiles` ย้ายไฟล์รูปแบบเก่า `lang_<code>.yml` (เวอร์ชันก่อนหน้าวางไว้ที่ราก
@@ -223,7 +226,7 @@ Placeholders สำคัญ (ใน message):
 
 **Command placeholder** (คนละชุดกับ message ข้างบน): `{player}` ใน `command`/`commands` ถูกแทนด้วยชื่อ
 ผู้เล่นที่ trigger ก่อน dispatch (`HotkeyManager` — `cmd.replace("{player}", playerName)`) หลัก ๆ ไว้ให้
-`run-as: CONSOLE` ยิงคำสั่งที่ต้องระบุ target ได้ เช่น `/heal {player}`
+`run-as: CONSOLE` ยิงคำสั่งที่ต้องระบุ target ได้ เช่น `heal {player}`
 
 เพิ่มภาษาใหม่: สร้างไฟล์ `src/main/resources/lang/<locale>.yml` (+ เพิ่มใน `BUNDLED_LOCALES` ถ้าอยากให้
 แตกออกมาอัตโนมัติ) แล้วเปลี่ยน `locale:` ใน config.yml — default ใน `ConfigManager` = `en`
