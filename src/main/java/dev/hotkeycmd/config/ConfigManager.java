@@ -107,7 +107,13 @@ public class ConfigManager {
                 }
                 commands = List.copyOf(commands);
 
-                String perm     = hk.getString("permission", "");
+                // permission: a node string, or `false` (or blank) to mean "no permission
+                // required" — everyone may use the hotkey. `false` is the intuitive way to turn
+                // the requirement off; YAML parses it as a boolean so getString yields "false",
+                // which we normalize (along with blanks) to an empty node.
+                String rawPerm  = hk.getString("permission", "");
+                String perm     = (rawPerm == null || rawPerm.isBlank()
+                                    || rawPerm.equalsIgnoreCase("false")) ? "" : rawPerm.trim();
                 boolean enabled = hk.getBoolean("enabled", true);
                 boolean cancel  = hk.getBoolean("cancel-action", true);
 
@@ -115,11 +121,12 @@ public class ConfigManager {
                 // bypasses the plugin's own permission check. If no permission node is
                 // set, EVERY player would be able to trigger it — a privilege-escalation
                 // hole. Refuse to load such an entry rather than silently exposing it.
+                // (An empty node here also covers permission: false / blank — not allowed for CONSOLE.)
                 if (runAs == RunAs.CONSOLE && perm.isEmpty()) {
                     plugin.getLogger().log(Level.SEVERE,
-                            "Refusing to load hotkey ''{0}'': run-as: CONSOLE requires a "
-                            + "non-empty permission. Without one, any player could run this "
-                            + "console command. Set a 'permission' node to enable it.", id);
+                            "Refusing to load hotkey ''{0}'': run-as: CONSOLE requires a real "
+                            + "permission node (false or blank is not allowed here). Without one, "
+                            + "any player could run this console command.", id);
                     continue;
                 }
 

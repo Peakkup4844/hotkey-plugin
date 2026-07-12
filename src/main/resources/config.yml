@@ -55,6 +55,11 @@ ignore-bedrock: true
 #     - "heal"
 #   (Leave commands empty + cancel-action: true to only BLOCK the vanilla action.)
 #
+# permission:  (WHO may use the hotkey)
+#   A permission node (e.g. hkcmd.key.warp_menu) that the player must have.
+#   Write  false  (or leave it blank) to require NO permission — everyone can use it.
+#   NOTE: run-as: CONSOLE always needs a real permission node; false/blank is refused there.
+#
 # cancel-action:
 #   true  – cancel the vanilla game action (item won't swap / drop / slot won't change)
 #   false – vanilla action still happens AND the command runs
@@ -91,10 +96,11 @@ hotkeys:
     run-as: PLAYER
 
   # Example – MULTI-KEY: same command fires on F OR Q (either key triggers it)
+  # permission: false here means everyone can use it (no permission node needed).
   # spawn_multikey:
   #   keys: [SWAP_HAND, DROP]
   #   command: "spawn"
-  #   permission: hkcmd.key.spawn_multikey
+  #   permission: false
   #   enabled: false
   #   cancel-action: true
   #   run-as: PLAYER

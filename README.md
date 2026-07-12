@@ -65,7 +65,7 @@ hotkeys:
   warp_menu:
     key: SNEAK_SWAP_HAND       # Shift + F
     command: "warps"           # no leading slash — added at runtime
-    permission: hkcmd.key.warp_menu
+    permission: hkcmd.key.warp_menu   # or `false` for no permission (everyone)
     enabled: true
     cancel-action: true        # don't actually swap hands
     run-as: PLAYER
@@ -132,6 +132,10 @@ Aliases: `/hotkeycmd`, `/hkc`
 | `hkcmd.key.*` | false | Allow every hotkey |
 
 A player without the required permission is silently ignored (no message).
+
+Set a hotkey's `permission` to **`false`** (or leave it blank) to require no permission at all —
+everyone can use it. A `run-as: CONSOLE` hotkey is the one exception: it always needs a real
+permission node, so `false`/blank is refused there (it would let anyone run console commands).
 
 ---
 

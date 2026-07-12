@@ -105,11 +105,13 @@ public class HotkeyManager {
         // Passed every gate — this is a real dispatch; record it for the hard floor.
         lastDispatch.put(uuid, now);
 
-        // Cancel the underlying game action if ANY matched hotkey requests it.
-        // Must happen here on the Netty thread — cannot be deferred.
+        // Single pass over the (small) matched list: decide whether to cancel the vanilla action
+        // and whether there's anything to run. Cancel must happen here on the Netty thread.
         boolean shouldCancel = false;
+        boolean anyCommand   = false;
         for (HotkeyDefinition def : valid) {
-            if (def.cancelAction()) { shouldCancel = true; break; }
+            if (def.cancelAction())         shouldCancel = true;
+            if (!def.commands().isEmpty())  anyCommand   = true;
         }
         if (shouldCancel) cancelPacket.run();
 
@@ -119,24 +121,32 @@ public class HotkeyManager {
                     + " matched=" + valid.stream().map(HotkeyDefinition::id).toList());
         }
 
-        // Execute commands on the correct server thread. Each matched hotkey may carry several
-        // commands (multi-command entry); every command runs, in listed order.
-        String playerName = player.getName();
-        for (HotkeyDefinition def : valid) {
-            for (String cmd : def.commands()) {
-                // {player} → the triggering player's name. Mainly so a run-as: CONSOLE command can
-                // target the player (e.g. "/heal {player}"); harmless for run-as: PLAYER too.
-                String resolved = cmd.replace("{player}", playerName);
-                String rawCmd = resolved.startsWith("/") ? resolved.substring(1) : resolved;
-
-                FoliaUtil.runTask(plugin, player, () -> {
-                    if (def.runAs() == RunAs.CONSOLE) {
-                        Bukkit.dispatchCommand(Bukkit.getConsoleSender(), rawCmd);
-                    } else {
-                        player.performCommand(rawCmd);
+        // Execute every matched hotkey's commands on the correct server thread — in ONE scheduled
+        // task per keypress instead of one per command (fewer main/region-thread hops), preserving
+        // listed order. String work ({player} substitution, slash strip) is deferred into that task
+        // so it stays off the Netty hot path. `valid` is a local list, fully built on this thread
+        // before submission; the scheduler hand-off publishes it safely to the target thread.
+        // Cancel-only hotkeys (no commands) schedule nothing.
+        if (anyCommand) {
+            List<HotkeyDefinition> toRun = valid;
+            FoliaUtil.runTask(plugin, player, () -> {
+                String playerName = player.getName();
+                for (HotkeyDefinition def : toRun) {
+                    boolean console = def.runAs() == RunAs.CONSOLE;
+                    for (String cmd : def.commands()) {
+                        // {player} → the triggering player's name. Mainly so a run-as: CONSOLE
+                        // command can target the player (e.g. "heal {player}"); harmless for PLAYER.
+                        String resolved = cmd.replace("{player}", playerName);
+                        // Config commands are written without a leading '/'; tolerate a stray one.
+                        String rawCmd = resolved.startsWith("/") ? resolved.substring(1) : resolved;
+                        if (console) {
+                            Bukkit.dispatchCommand(Bukkit.getConsoleSender(), rawCmd);
+                        } else {
+                            player.performCommand(rawCmd);
+                        }
                     }
-                });
-            }
+                }
+            });
         }
     }
 

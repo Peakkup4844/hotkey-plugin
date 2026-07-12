@@ -173,7 +173,7 @@ hotkeys:
   <id>:
     key: <KeyTrigger>       # single — หรือใช้ `keys: [A, B]` ผูกหลายปุ่มใน entry เดียว
     command: "..."          # single — หรือใช้ `commands: ["a", "b"]` รันหลายคำสั่ง (ไม่ต้องใส่ /)
-    permission: "hkcmd.key.<id>"
+    permission: "hkcmd.key.<id>"   # หรือ false / เว้นว่าง = ไม่ต้องมี permission (ทุกคนใช้ได้)
     enabled: true
     cancel-action: true     # per-hotkey
     run-as: PLAYER          # PLAYER | CONSOLE
@@ -183,7 +183,11 @@ hotkeys:
 - `key`/`keys` → parse เป็น `List<KeyTrigger>` (dedup ด้วย LinkedHashSet); ถ้ามีปุ่มใด invalid → skip ทั้ง entry + WARNING
 - `command`/`commands` → parse เป็น `List<String>` (ตัด blank ออก); **empty list ได้** = hotkey ที่ cancel action เฉย ๆ ไม่รันคำสั่ง
 - `HotkeyDefinition` เก็บ `List<KeyTrigger> keys` + `List<String> commands` (ทั้งคู่ `List.copyOf` = immutable ตาม invariant)
-- `HotkeyManager` dispatch: วน `valid` → วน `def.commands()` รันทุกคำสั่งตามลำดับ; `shouldCancel = anyMatch(cancelAction)`
+- `HotkeyManager` dispatch: วน `valid` รอบเดียวหา `shouldCancel`/`anyCommand` → cancel บน Netty →
+  ถ้า `anyCommand` schedule **task เดียว** ที่วน `valid` → `def.commands()` รันทุกคำสั่งตามลำดับ
+  - **1 task ต่อ 1 keypress** (ไม่ใช่ 1 task ต่อ 1 command) — ลด main/region-thread hop; hotkey ที่
+    cancel อย่างเดียว (ไม่มี command) ไม่ schedule task เลย
+  - **String work อยู่ใน task** ({player} substitution + slash strip) → ไม่แตะ Netty hot path
   - **Leading slash**: config เขียนคำสั่ง**ไม่ต้องมี `/`** — dispatch ตัด `/` นำหน้าออกถ้าเผลอใส่ (`rawCmd = startsWith("/") ? substring(1) : cmd`) เพราะทั้ง `performCommand`/`dispatchCommand` รับแบบไม่มี `/`
 - 1 entry ที่มีหลาย key ถูก index **ซ้ำใต้ทุก key** ใน `byKey` (def object เดียวกัน)
 
@@ -204,8 +208,12 @@ Upgrade config เก่าที่ผู้ใช้แก้ไว้แบ�
 - `key` ที่ผิด enum → ข้าม entry นั้น + log WARNING ที่ **list ปุ่มที่ valid ทั้งหมด** (`validKeys()`)
   และบอกว่าปุ่มตัวอักษรใช้ไม่ได้ (กัน silent "กดไม่ติด" จากการพิมพ์ชื่อปุ่มที่ไม่มี เช่น `L`)
 - `run-as` ที่ผิด enum → ข้าม entry นั้น + log WARNING (บอกให้ใช้ PLAYER/CONSOLE)
-- **`run-as: CONSOLE` ต้องมี `permission` ไม่ว่าง** ถ้าว่างจะถูก **ปฏิเสธไม่โหลด** + log SEVERE
-  (กัน privilege escalation — console hotkey ที่ไม่มี permission = ผู้เล่นทุกคนรันคำสั่ง console ได้)
+- **`permission: false` (หรือเว้นว่าง/blank) → normalize เป็น `""`** = ไม่ต้องขอสิทธิ์ (ทุกคนใช้ได้)
+  YAML parse `false` เป็น boolean → `getString` ได้ `"false"` → เช็ค `equalsIgnoreCase("false")`/`isBlank()`
+  แล้วแปลงเป็น `""` (ไม่งั้นจะกลายเป็น permission node ชื่อ "false")
+- **`run-as: CONSOLE` ต้องมี `permission` จริง** ถ้าว่าง/`false` (perm เป็น `""` หลัง normalize) จะถูก
+  **ปฏิเสธไม่โหลด** + log SEVERE (กัน privilege escalation — console hotkey ที่ไม่มี permission =
+  ผู้เล่นทุกคนรันคำสั่ง console ได้)
 
 ---
 
@@ -312,6 +320,8 @@ Java 21+ required (Maven 4 + JDK 24 ทดสอบแล้ว — ใช้ไ
   (flat list `hotkeys` เก็บครบทุก entry ไว้ให้ admin list/info) — ถ้าลืม index ปุ่มจะกดไม่ติด
   → entry ที่มีหลาย key ถูก add เข้า index **ทุก key** (loop `def.keys()`) — def เดียวโผล่ในหลาย bucket ได้
 - **`ArrayList valid` ถูก alloc เฉพาะตอนมี hotkey ผูกจริง** (lazy) ห้ามเปลี่ยนกลับไป stream ทุก packet
+  → dispatch capture `valid` (ผ่าน alias `toRun` ที่ effectively-final) เข้า lambda **task เดียว**;
+  `valid` ถูกสร้างเสร็จบน Netty thread ก่อน submit และไม่ถูกแตะต่อ → scheduler hand-off publish ให้ปลอดภัย
 - **ลำดับ gate ใน `handleTrigger`: `bound.isEmpty` → hard floor → permission scan → cooldown → dispatch**
   hard floor อยู่**ก่อน** permission scan ตั้งใจ (floor เป็น O(1) zero-alloc, drop flood ก่อนจะ alloc `valid`/
   เรียก `hasPermission`). ปลอดภัยเพราะ `lastDispatch` เขียนเฉพาะตอน dispatch จริง → ผู้เล่นที่ไม่มีสิทธิ์
