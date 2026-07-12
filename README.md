@@ -190,6 +190,10 @@ dependency needed by the Paper API.
 
 Beta. Feedback and bug reports are welcome via the issue tracker.
 
+> **A note on support.** This is a side project I don't actively work on day to day. Please still
+> open an issue for anything that breaks — I read them and keep a list — but fixes land whenever I
+> next have free time, so replies may take a while. Thanks for your patience.
+
 ## License
 
 Licensed under the [GNU General Public License v3.0](LICENSE). You may use, modify, and redistribute
