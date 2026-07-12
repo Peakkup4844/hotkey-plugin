@@ -35,6 +35,7 @@ info-key: "  &7Phím&8: &f{key}"
 info-command: "  &7Lệnh&8: &f{command}"
 info-permission: "  &7Quyền&8: &f{permission}"
 info-cancel: "  &7Hủy hành động&8: &f{cancel}"
+info-cooldown: "  &7Thời gian hồi&8: &f{cooldown}"
 info-run-as: "  &7Chạy dưới danh nghĩa&8: &f{run_as}"
 info-status: "  &7Trạng thái&8: {status}"
 # Chỗ thay thế: {id}

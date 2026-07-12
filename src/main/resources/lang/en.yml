@@ -30,11 +30,12 @@ no-hotkeys: "{prefix}&7No hotkeys registered yet"
 
 # Placeholders: {id}
 info-header: "{prefix}&eHotkey info &f{id}&e:"
-# Placeholders for info lines: {key}, {command}, {permission}, {cancel}, {run_as}, {status}
+# Placeholders for info lines: {key}, {command}, {permission}, {cancel}, {cooldown}, {run_as}, {status}
 info-key: "  &7Key&8: &f{key}"
 info-command: "  &7Command&8: &f{command}"
 info-permission: "  &7Permission&8: &f{permission}"
 info-cancel: "  &7Cancel Action&8: &f{cancel}"
+info-cooldown: "  &7Cooldown&8: &f{cooldown}"
 info-run-as: "  &7Run As&8: &f{run_as}"
 info-status: "  &7Status&8: {status}"
 # Placeholder: {id}

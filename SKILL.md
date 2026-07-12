@@ -174,6 +174,7 @@ hotkeys:
     key: <KeyTrigger>       # single — หรือใช้ `keys: [A, B]` ผูกหลายปุ่มใน entry เดียว
     command: "..."          # single — หรือใช้ `commands: ["a", "b"]` รันหลายคำสั่ง (ไม่ต้องใส่ /)
     permission: "hkcmd.key.<id>"   # หรือ false / เว้นว่าง = ไม่ต้องมี permission (ทุกคนใช้ได้)
+    cooldown: 5             # optional: cooldown วินาทีของ hotkey นี้เอง; ไม่ใส่ = ใช้ global-cooldown; 0 = ปิดเฉพาะตัวนี้
     enabled: true
     cancel-action: true     # per-hotkey
     run-as: PLAYER          # PLAYER | CONSOLE
@@ -183,12 +184,17 @@ hotkeys:
 - `key`/`keys` → parse เป็น `List<KeyTrigger>` (dedup ด้วย LinkedHashSet); ถ้ามีปุ่มใด invalid → skip ทั้ง entry + WARNING
 - `command`/`commands` → parse เป็น `List<String>` (ตัด blank ออก); **empty list ได้** = hotkey ที่ cancel action เฉย ๆ ไม่รันคำสั่ง
 - `HotkeyDefinition` เก็บ `List<KeyTrigger> keys` + `List<String> commands` (ทั้งคู่ `List.copyOf` = immutable ตาม invariant)
-- `HotkeyManager` dispatch: วน `valid` รอบเดียวหา `shouldCancel`/`anyCommand` → cancel บน Netty →
-  ถ้า `anyCommand` schedule **task เดียว** ที่วน `valid` → `def.commands()` รันทุกคำสั่งตามลำดับ
+  + `double cooldown` (per-hotkey; `-1` = ไม่ได้ตั้ง → ใช้ global, `0` = ปิด cooldown เฉพาะตัวนี้)
+- `HotkeyManager` dispatch: หลัง permission scan → **per-hotkey cooldown scan** สร้าง list `ready`
+  (เฉพาะ hotkey ที่พ้น cooldown ของตัวเอง) → วน `ready` หา `shouldCancel`/`anyCommand` → cancel บน Netty →
+  ถ้า `anyCommand` schedule **task เดียว** ที่วน `ready` → `def.commands()` รันทุกคำสั่งตามลำดับ
   - **1 task ต่อ 1 keypress** (ไม่ใช่ 1 task ต่อ 1 command) — ลด main/region-thread hop; hotkey ที่
     cancel อย่างเดียว (ไม่มี command) ไม่ schedule task เลย
   - **String work อยู่ใน task** ({player} substitution + slash strip) → ไม่แตะ Netty hot path
   - **Leading slash**: config เขียนคำสั่ง**ไม่ต้องมี `/`** — dispatch ตัด `/` นำหน้าออกถ้าเผลอใส่ (`rawCmd = startsWith("/") ? substring(1) : cmd`) เพราะทั้ง `performCommand`/`dispatchCommand` รับแบบไม่มี `/`
+  - **Debug ช่วย diagnose**: ถ้า `debug: true` และ `performCommand`/`dispatchCommand` คืน `false`
+    (คำสั่งไม่พบ/ล้มเหลว — เช่นตั้ง `run-as: CONSOLE` ให้คำสั่งที่ต้องมี player context อย่างเมนู DeluxeMenus)
+    จะ log WARNING พร้อม id + run-as + คำสั่ง → หาเหตุ "hotkey กดแล้วไม่ทำงาน" ได้
 - 1 entry ที่มีหลาย key ถูก index **ซ้ำใต้ทุก key** ใน `byKey` (def object เดียวกัน)
 
 ### Config migration (ConfigManager.migrateConfig — รันทุก load / reload)
@@ -214,6 +220,9 @@ Upgrade config เก่าที่ผู้ใช้แก้ไว้แบ�
 - **`run-as: CONSOLE` ต้องมี `permission` จริง** ถ้าว่าง/`false` (perm เป็น `""` หลัง normalize) จะถูก
   **ปฏิเสธไม่โหลด** + log SEVERE (กัน privilege escalation — console hotkey ที่ไม่มี permission =
   ผู้เล่นทุกคนรันคำสั่ง console ได้)
+- **`cooldown` → `getDouble("cooldown", -1)`** default `-1` แยก "ไม่ได้ตั้ง" (→ fall back global-cooldown ตอน
+  trigger) ออกจาก "ตั้ง `0`" (→ ปิด cooldown เฉพาะ hotkey นี้แม้ global จะไม่ 0). ไม่ validate ค่าติดลบอื่น
+  (ทุกค่า `< 0` = ไม่ได้ตั้ง)
 
 ---
 
@@ -234,7 +243,7 @@ Placeholders สำคัญ (ใน message):
 - `{prefix}` — ถูก inject ทุก key อัตโนมัติ
 - `{remaining}` — ใน `on-cooldown`
 - `{id}`, `{key}`, `{command}`, `{status}` — ใน `list-entry`, `info-*`
-- `{run_as}`, `{cancel}`, `{permission}` — ใน `info-*`
+- `{run_as}`, `{cancel}`, `{permission}`, `{cooldown}` — ใน `info-*` (`info-cooldown` = ค่า cooldown ของ hotkey; format ใน Java: `"Xs"` / `"off"` / `"X.Xs (default)"`)
 
 **Command placeholder** (คนละชุดกับ message ข้างบน): `{player}` ใน `command`/`commands` ถูกแทนด้วยชื่อ
 ผู้เล่นที่ trigger ก่อน dispatch (`HotkeyManager` — `cmd.replace("{player}", playerName)`) หลัก ๆ ไว้ให้
@@ -294,6 +303,7 @@ Java 21+ required (Maven 4 + JDK 24 ทดสอบแล้ว — ใช้ไ
 - **CONSOLE ต้องมี permission** — บังคับใน `ConfigManager.load` (ดู Validation rules ข้างบน)
 - **Cooldown notify throttle** — `HotkeyManager` ส่งข้อความ `on-cooldown` ได้สูงสุด 1 ครั้ง/วินาที/ผู้เล่น
   (`NOTIFY_THROTTLE_MS = 1000`, map `lastNotify`) กัน packet-flood สร้าง main/region-thread task ไม่จำกัด
+  (ส่งเฉพาะตอน hotkey ที่ match **ติด cooldown หมดทุกตัว**; ใช้ `minRemaining` = เวลาที่เหลือน้อยสุด)
 - **Hard dispatch floor** — `HotkeyManager` จำกัดการ dispatch command ขั้นต่ำ 50ms/ผู้เล่น
   (`MIN_DISPATCH_INTERVAL_MS = 50`, map `lastDispatch`) **ทำงานเสมอแม้ `global-cooldown: 0`**
   trigger ที่เร็วกว่านี้จะถูก drop เงียบ ๆ (ไม่มีข้อความ) → กัน DoS amplification จาก client เดียว
@@ -319,19 +329,23 @@ Java 21+ required (Maven 4 + JDK 24 ทดสอบแล้ว — ใช้ไ
   → **ถ้าแก้ `load()` ต้อง rebuild `byKey` ให้ sync กับ `hotkeys` เสมอ** และ index เก็บเฉพาะ enabled
   (flat list `hotkeys` เก็บครบทุก entry ไว้ให้ admin list/info) — ถ้าลืม index ปุ่มจะกดไม่ติด
   → entry ที่มีหลาย key ถูก add เข้า index **ทุก key** (loop `def.keys()`) — def เดียวโผล่ในหลาย bucket ได้
-- **`ArrayList valid` ถูก alloc เฉพาะตอนมี hotkey ผูกจริง** (lazy) ห้ามเปลี่ยนกลับไป stream ทุก packet
-  → dispatch capture `valid` (ผ่าน alias `toRun` ที่ effectively-final) เข้า lambda **task เดียว**;
-  `valid` ถูกสร้างเสร็จบน Netty thread ก่อน submit และไม่ถูกแตะต่อ → scheduler hand-off publish ให้ปลอดภัย
-- **ลำดับ gate ใน `handleTrigger`: `bound.isEmpty` → hard floor → permission scan → cooldown → dispatch**
+- **`ArrayList valid`/`ready` ถูก alloc เฉพาะตอนมี hotkey ผูกจริง** (lazy) ห้ามเปลี่ยนกลับไป stream ทุก packet
+  → dispatch capture `ready` (ผ่าน alias `toRun` ที่ effectively-final) เข้า lambda **task เดียว**;
+  `ready` ถูกสร้างเสร็จบน Netty thread ก่อน submit และไม่ถูกแตะต่อ → scheduler hand-off publish ให้ปลอดภัย
+- **ลำดับ gate ใน `handleTrigger`: `bound.isEmpty` → hard floor → permission scan → per-hotkey cooldown → dispatch**
   hard floor อยู่**ก่อน** permission scan ตั้งใจ (floor เป็น O(1) zero-alloc, drop flood ก่อนจะ alloc `valid`/
   เรียก `hasPermission`). ปลอดภัยเพราะ `lastDispatch` เขียนเฉพาะตอน dispatch จริง → ผู้เล่นที่ไม่มีสิทธิ์
   `lastDispatch=0` ผ่าน floor เสมอ ลำดับนี้ไม่เปลี่ยนผลว่า command จะรันไหม แค่ลด work ตอนโดน flood
   → **ห้ามเลื่อน permission scan ขึ้นก่อน floor** (จะทำให้ flood กลับมา alloc/เช็ค perm ทุก packet)
+- **Per-hotkey cooldown = nested map `ConcurrentHashMap<UUID, ConcurrentHashMap<String,Long>>`** (`cooldowns`)
+  outer keyed UUID, inner keyed hotkey id → last-trigger ms. inner map สร้าง lazy ตอน trigger แรกที่มี
+  cooldown, ถูกลบทั้งก้อนใน `removeCooldown()` (quit). แต่ละ hotkey เช็ค/อัปเดต cooldown ของ **ตัวเอง**
+  แยกกัน → hotkey หนึ่งติด cooldown ไม่บล็อกตัวอื่น; effective cooldown = `def.cooldown() >= 0 ? def.cooldown() : globalCooldown`
+  → ถ้าทุก hotkey ที่ match ติด cooldown หมด (`ready == null`) ส่ง `on-cooldown` (throttle) แล้ว return ก่อน cancel
 
 ---
 
 ## สิ่งที่ยังไม่รองรับ / Future work
 
-- Per-hotkey cooldown (ปัจจุบันเป็น global เท่านั้น)
 - Sprint / Elytra เป็น trigger (ENTITY_ACTION พร้อมแล้ว แค่ยังไม่ expose ใน KeyTrigger —
   จงใจไม่ทำเพราะ START_SPRINTING fire ทุกครั้งที่เริ่มวิ่ง = spam/footgun)

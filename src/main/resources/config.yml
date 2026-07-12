@@ -60,6 +60,13 @@ ignore-bedrock: true
 #   Write  false  (or leave it blank) to require NO permission — everyone can use it.
 #   NOTE: run-as: CONSOLE always needs a real permission node; false/blank is refused there.
 #
+# cooldown:  (per-hotkey cooldown, in seconds)
+#   This hotkey's OWN cooldown, tracked separately from every other hotkey.
+#   Leave it out  → the hotkey uses the global 'global-cooldown' value above.
+#   cooldown: 5   → 5-second cooldown for THIS hotkey only.
+#   cooldown: 0   → no cooldown for this hotkey, even if global-cooldown is set.
+#   (The hard 50ms anti-flood floor still applies and cannot be turned off.)
+#
 # cancel-action:
 #   true  – cancel the vanilla game action (item won't swap / drop / slot won't change)
 #   false – vanilla action still happens AND the command runs
@@ -91,6 +98,7 @@ hotkeys:
     key: SNEAK_DROP             # Shift + Q
     command: "home"
     permission: hkcmd.key.go_home
+    cooldown: 5                 # this hotkey only: 5s (overrides global-cooldown)
     enabled: true
     cancel-action: true
     run-as: PLAYER

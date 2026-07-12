@@ -35,6 +35,7 @@ info-key: "  &7Key&8: &f{key}"
 info-command: "  &7Command&8: &f{command}"
 info-permission: "  &7Permission&8: &f{permission}"
 info-cancel: "  &7Cancel Action&8: &f{cancel}"
+info-cooldown: "  &7คูลดาวน์&8: &f{cooldown}"
 info-run-as: "  &7Run As&8: &f{run_as}"
 info-status: "  &7Status&8: {status}"
 # Placeholder: {id}

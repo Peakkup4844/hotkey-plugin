@@ -35,6 +35,7 @@ info-key: "  &7키&8: &f{key}"
 info-command: "  &7명령어&8: &f{command}"
 info-permission: "  &7권한&8: &f{permission}"
 info-cancel: "  &7동작 취소&8: &f{cancel}"
+info-cooldown: "  &7쿨다운&8: &f{cooldown}"
 info-run-as: "  &7실행 주체&8: &f{run_as}"
 info-status: "  &7상태&8: {status}"
 # 자리표시자: {id}

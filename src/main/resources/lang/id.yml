@@ -35,6 +35,7 @@ info-key: "  &7Tombol&8: &f{key}"
 info-command: "  &7Perintah&8: &f{command}"
 info-permission: "  &7Izin&8: &f{permission}"
 info-cancel: "  &7Batalkan aksi&8: &f{cancel}"
+info-cooldown: "  &7Waktu jeda&8: &f{cooldown}"
 info-run-as: "  &7Jalankan sebagai&8: &f{run_as}"
 info-status: "  &7Status&8: {status}"
 # Placeholder: {id}

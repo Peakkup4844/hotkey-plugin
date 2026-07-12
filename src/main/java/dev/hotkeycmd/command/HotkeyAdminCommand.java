@@ -104,6 +104,7 @@ public class HotkeyAdminCommand implements CommandExecutor, TabCompleter {
         sender.sendMessage(plugin.getLangManager().get("info-command",    Map.of("command", commandsStr(def))));
         sender.sendMessage(plugin.getLangManager().get("info-permission", Map.of("permission", def.permission().isEmpty() ? "(none)" : def.permission())));
         sender.sendMessage(plugin.getLangManager().get("info-cancel",     Map.of("cancel",  String.valueOf(def.cancelAction()))));
+        sender.sendMessage(plugin.getLangManager().get("info-cooldown",   Map.of("cooldown", cooldownStr(def))));
         sender.sendMessage(plugin.getLangManager().get("info-run-as",     Map.of("run_as",  def.runAs().name())));
         sender.sendMessage(plugin.getLangManager().get("info-status",     Map.of("status",  plugin.getLangManager().get(statusKey))));
     }
@@ -143,6 +144,18 @@ public class HotkeyAdminCommand implements CommandExecutor, TabCompleter {
     /** All of a hotkey's commands as a comma-separated string for display ("(none)" if empty). */
     private static String commandsStr(HotkeyDefinition def) {
         return def.commands().isEmpty() ? "(none)" : String.join(", ", def.commands());
+    }
+
+    /**
+     * A hotkey's cooldown for display: its own value in seconds, "off" when explicitly 0, or the
+     * current global-cooldown marked "(default)" when the hotkey didn't set its own (cooldown &lt; 0).
+     */
+    private String cooldownStr(HotkeyDefinition def) {
+        double cd = def.cooldown();
+        if (cd < 0) {
+            return String.format("%.1fs (default)", plugin.getConfigManager().getGlobalCooldown());
+        }
+        return cd == 0 ? "off" : String.format("%.1fs", cd);
     }
 
     private List<String> filter(List<String> options, String input) {

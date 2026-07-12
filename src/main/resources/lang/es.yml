@@ -35,6 +35,7 @@ info-key: "  &7Tecla&8: &f{key}"
 info-command: "  &7Comando&8: &f{command}"
 info-permission: "  &7Permiso&8: &f{permission}"
 info-cancel: "  &7Cancelar acción&8: &f{cancel}"
+info-cooldown: "  &7Enfriamiento&8: &f{cooldown}"
 info-run-as: "  &7Ejecutar como&8: &f{run_as}"
 info-status: "  &7Estado&8: {status}"
 # Marcador: {id}

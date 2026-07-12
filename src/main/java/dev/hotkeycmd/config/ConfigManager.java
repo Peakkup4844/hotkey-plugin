@@ -117,6 +117,12 @@ public class ConfigManager {
                 boolean enabled = hk.getBoolean("enabled", true);
                 boolean cancel  = hk.getBoolean("cancel-action", true);
 
+                // cooldown: this hotkey's own cooldown in seconds. Not set → -1 (fall back to
+                // global-cooldown at trigger time). 0 → explicitly no cooldown for this hotkey,
+                // even if global-cooldown is non-zero. getDouble's default of -1 distinguishes
+                // "absent" from an explicit "0", so both intents are preserved.
+                double cooldown = hk.getDouble("cooldown", -1);
+
                 // Security: a CONSOLE hotkey runs with full server privileges and
                 // bypasses the plugin's own permission check. If no permission node is
                 // set, EVERY player would be able to trigger it — a privilege-escalation
@@ -130,7 +136,7 @@ public class ConfigManager {
                     continue;
                 }
 
-                loaded.add(new HotkeyDefinition(id, keys, commands, perm, enabled, cancel, runAs));
+                loaded.add(new HotkeyDefinition(id, keys, commands, perm, enabled, cancel, runAs, cooldown));
             }
         }
 

@@ -21,6 +21,8 @@ Built on [PacketEvents](https://github.com/retrooper/packetevents) and works on
 - 🚫 **Cancel the vanilla action** — e.g. press Ctrl+Q to open a shop *without* dropping your stack.
 - 👤 **Run as player or console** — per hotkey (`run-as: PLAYER | CONSOLE`); use `{player}` in a
   command to insert the triggering player's name (handy for console-run commands like `heal {player}`).
+- ⏱️ **Per-hotkey cooldown** — each hotkey has its own `cooldown` (tracked independently), or falls
+  back to a shared `global-cooldown` default.
 - 🌍 **Multi-language** — English (default), 简体中文, ไทย, Español, Русский, Tiếng Việt,
   Bahasa Indonesia, 한국어, all extracted into a `lang/` folder you can edit; unknown locale falls
   back to English.
@@ -57,7 +59,7 @@ Built on [PacketEvents](https://github.com/retrooper/packetevents) and works on
 
 ```yaml
 locale: en              # en | zh | th | es | ru | vi | id | ko | <custom>
-global-cooldown: 1.5    # seconds shared across all hotkeys per player (0 = off)
+global-cooldown: 1.5    # default cooldown (seconds) for hotkeys that don't set their own (0 = off)
 debug: false
 ignore-bedrock: true    # skip Bedrock players (Floodgate only)
 
@@ -77,6 +79,7 @@ hotkeys:
       - "heal"
       - "feed"
     permission: hkcmd.key.buff_combo
+    cooldown: 10               # this hotkey only; omit to use global-cooldown
     enabled: true
     cancel-action: false
     run-as: PLAYER
@@ -137,6 +140,14 @@ Set a hotkey's `permission` to **`false`** (or leave it blank) to require no per
 everyone can use it. A `run-as: CONSOLE` hotkey is the one exception: it always needs a real
 permission node, so `false`/blank is refused there (it would let anyone run console commands).
 
+### Cooldown
+
+`global-cooldown` sets the default cooldown for every hotkey. Give any hotkey its own
+**`cooldown`** (seconds) to override that default for that hotkey alone — each hotkey's cooldown
+is tracked **independently**, so one being on cooldown never blocks another. Omit `cooldown` to
+use the global value; set `cooldown: 0` to disable the cooldown for just that hotkey. A hard
+50 ms anti-flood floor always applies on top and can't be turned off.
+
 ---
 
 ## Limitations
@@ -146,8 +157,6 @@ permission node, so `false`/blank is refused there (it would let anyone run cons
   hotbar keys (plus sneak state) are visible, so those are all you can bind **without a client-side
   mod**. *Workaround:* a player can rebind "Swap Item With Offhand" or "Drop Item" to another key in
   **Options → Controls**, and that key will then trigger the matching hotkey.
-- **Cooldown is global per player.** All hotkeys share one `global-cooldown`; there is no per-hotkey
-  cooldown yet.
 - **Bedrock detection needs Floodgate.** `ignore-bedrock` identifies Bedrock players by their
   Floodgate UUID signature. With Geyser in standalone-proxy mode, Bedrock players look like Java
   players and can't be skipped.

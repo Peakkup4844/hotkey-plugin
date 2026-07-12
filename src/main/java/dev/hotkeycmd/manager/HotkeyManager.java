@@ -31,8 +31,12 @@ public class HotkeyManager {
     // flood. Triggers above this rate are silently dropped (no message — it's flood territory).
     private static final long MIN_DISPATCH_INTERVAL_MS = 50L;
 
-    // Last trigger timestamp per player; accessed from Netty threads → ConcurrentHashMap
-    private final ConcurrentHashMap<UUID, Long> cooldowns = new ConcurrentHashMap<>();
+    // Per-hotkey cooldown state: player → (hotkey id → last-trigger timestamp). Each hotkey
+    // tracks its own cooldown independently so one hotkey's cooldown never blocks another.
+    // Accessed from Netty threads → ConcurrentHashMap (outer and inner). The inner map is
+    // created lazily on a player's first cooldownable trigger and dropped whole on quit.
+    private final ConcurrentHashMap<UUID, ConcurrentHashMap<String, Long>> cooldowns =
+            new ConcurrentHashMap<>();
 
     // Last time we sent an "on cooldown" message to a player; throttles notification spam
     private final ConcurrentHashMap<UUID, Long> lastNotify = new ConcurrentHashMap<>();
@@ -80,45 +84,65 @@ public class HotkeyManager {
         }
         if (valid == null) return;
 
-        // Cooldown check — done on Netty thread; ConcurrentHashMap guarantees atomicity
-        double cooldownSec = plugin.getConfigManager().getGlobalCooldown();
-        if (cooldownSec > 0) {
-            long last = cooldowns.getOrDefault(uuid, 0L);
-            long remaining = (long)(cooldownSec * 1000) - (now - last);
-
-            if (remaining > 0) {
-                // Throttle the notification so packet-flooding can't schedule unbounded
-                // main/region-thread tasks. Only message once per NOTIFY_THROTTLE_MS.
-                long lastMsg = lastNotify.getOrDefault(uuid, 0L);
-                if (now - lastMsg >= NOTIFY_THROTTLE_MS) {
-                    lastNotify.put(uuid, now);
-                    String remainingStr = String.format("%.1f", remaining / 1000.0);
-                    FoliaUtil.runTask(plugin, player, () ->
-                            plugin.getLangManager().send(player, "on-cooldown",
-                                    Map.of("remaining", remainingStr)));
+        // Per-hotkey cooldown check — on the Netty thread; ConcurrentHashMap guarantees atomicity.
+        // Each matched hotkey is gated by its OWN cooldown (its configured `cooldown`, or the
+        // global-cooldown when it left that unset). Ready hotkeys go into `ready`; ones still
+        // cooling down are skipped (they neither run nor cancel). A hotkey with an effective
+        // cooldown of 0 has no gate and is always ready.
+        double globalCd = plugin.getConfigManager().getGlobalCooldown();
+        ConcurrentHashMap<String, Long> playerCd = null;   // inner map, fetched lazily
+        List<HotkeyDefinition> ready = null;
+        long minRemaining = Long.MAX_VALUE;                // shortest wait among skipped hotkeys
+        for (HotkeyDefinition hk : valid) {
+            double cd = hk.cooldown() >= 0 ? hk.cooldown() : globalCd;
+            if (cd > 0) {
+                if (playerCd == null) {
+                    playerCd = cooldowns.computeIfAbsent(uuid, u -> new ConcurrentHashMap<>());
                 }
-                return;
+                long last = playerCd.getOrDefault(hk.id(), 0L);
+                long remaining = (long)(cd * 1000) - (now - last);
+                if (remaining > 0) {
+                    if (remaining < minRemaining) minRemaining = remaining;
+                    continue;   // this hotkey is on cooldown — skip it
+                }
+                playerCd.put(hk.id(), now);
             }
-            cooldowns.put(uuid, now);
+            if (ready == null) ready = new ArrayList<>(valid.size());
+            ready.add(hk);
+        }
+
+        if (ready == null) {
+            // Every matched hotkey is on cooldown. Notify once per NOTIFY_THROTTLE_MS so a
+            // client flooding a bound key can't schedule unbounded main/region-thread tasks.
+            long lastMsg = lastNotify.getOrDefault(uuid, 0L);
+            if (now - lastMsg >= NOTIFY_THROTTLE_MS) {
+                lastNotify.put(uuid, now);
+                String remainingStr = String.format("%.1f", minRemaining / 1000.0);
+                FoliaUtil.runTask(plugin, player, () ->
+                        plugin.getLangManager().send(player, "on-cooldown",
+                                Map.of("remaining", remainingStr)));
+            }
+            return;
         }
 
         // Passed every gate — this is a real dispatch; record it for the hard floor.
         lastDispatch.put(uuid, now);
 
-        // Single pass over the (small) matched list: decide whether to cancel the vanilla action
+        // Single pass over the ready hotkeys: decide whether to cancel the vanilla action
         // and whether there's anything to run. Cancel must happen here on the Netty thread.
         boolean shouldCancel = false;
         boolean anyCommand   = false;
-        for (HotkeyDefinition def : valid) {
+        for (HotkeyDefinition def : ready) {
             if (def.cancelAction())         shouldCancel = true;
             if (!def.commands().isEmpty())  anyCommand   = true;
         }
         if (shouldCancel) cancelPacket.run();
 
         if (plugin.getConfigManager().isDebug()) {
+            List<HotkeyDefinition> matched = ready;
             plugin.getLogger().info("[Debug] " + player.getName()
                     + " → trigger=" + trigger.name()
-                    + " matched=" + valid.stream().map(HotkeyDefinition::id).toList());
+                    + " matched=" + matched.stream().map(HotkeyDefinition::id).toList());
         }
 
         // Execute every matched hotkey's commands on the correct server thread — in ONE scheduled
@@ -128,7 +152,8 @@ public class HotkeyManager {
         // before submission; the scheduler hand-off publishes it safely to the target thread.
         // Cancel-only hotkeys (no commands) schedule nothing.
         if (anyCommand) {
-            List<HotkeyDefinition> toRun = valid;
+            List<HotkeyDefinition> toRun = ready;
+            boolean debug = plugin.getConfigManager().isDebug();
             FoliaUtil.runTask(plugin, player, () -> {
                 String playerName = player.getName();
                 for (HotkeyDefinition def : toRun) {
@@ -139,10 +164,20 @@ public class HotkeyManager {
                         String resolved = cmd.replace("{player}", playerName);
                         // Config commands are written without a leading '/'; tolerate a stray one.
                         String rawCmd = resolved.startsWith("/") ? resolved.substring(1) : resolved;
+                        boolean ok;
                         if (console) {
-                            Bukkit.dispatchCommand(Bukkit.getConsoleSender(), rawCmd);
+                            ok = Bukkit.dispatchCommand(Bukkit.getConsoleSender(), rawCmd);
                         } else {
-                            player.performCommand(rawCmd);
+                            ok = player.performCommand(rawCmd);
+                        }
+                        // A false result means the command was not found or reported failure —
+                        // the usual reason a hotkey "does nothing" (wrong run-as for a command
+                        // that needs a player, unregistered command, missing permission, etc.).
+                        // Surfaced only under debug so normal play stays silent.
+                        if (debug && !ok) {
+                            plugin.getLogger().warning("[Debug] command returned failure for "
+                                    + playerName + " (" + def.id() + ", run-as "
+                                    + (console ? "CONSOLE" : "PLAYER") + "): /" + rawCmd);
                         }
                     }
                 }
