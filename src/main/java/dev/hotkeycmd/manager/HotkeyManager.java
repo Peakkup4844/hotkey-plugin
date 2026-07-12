@@ -121,9 +121,13 @@ public class HotkeyManager {
 
         // Execute commands on the correct server thread. Each matched hotkey may carry several
         // commands (multi-command entry); every command runs, in listed order.
+        String playerName = player.getName();
         for (HotkeyDefinition def : valid) {
             for (String cmd : def.commands()) {
-                String rawCmd = cmd.startsWith("/") ? cmd.substring(1) : cmd;
+                // {player} → the triggering player's name. Mainly so a run-as: CONSOLE command can
+                // target the player (e.g. "/heal {player}"); harmless for run-as: PLAYER too.
+                String resolved = cmd.replace("{player}", playerName);
+                String rawCmd = resolved.startsWith("/") ? resolved.substring(1) : resolved;
 
                 FoliaUtil.runTask(plugin, player, () -> {
                     if (def.runAs() == RunAs.CONSOLE) {

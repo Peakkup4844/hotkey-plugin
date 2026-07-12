@@ -21,7 +21,7 @@ hotkey-plugin/
     │   │   ├── KeyTrigger.java              ← enum hotkey identifiers
     │   │   └── RunAs.java                   ← enum PLAYER | CONSOLE
     │   ├── lang/
-    │   │   └── LangManager.java             ← lang_<locale>.yml
+    │   │   └── LangManager.java             ← lang/<locale>.yml (extracts all bundled locales)
     │   ├── listener/
     │   │   ├── PacketHotkeyListener.java    ← PacketEvents (Netty thread)
     │   │   └── PlayerQuitListener.java      ← cleanup on disconnect
@@ -32,9 +32,10 @@ hotkey-plugin/
     └── resources/
         ├── plugin.yml
         ├── config.yml
-        ├── lang_en.yml                 ← English (default locale)
-        ├── lang_zh.yml                 ← 简体中文
-        └── lang_th.yml                 ← ไทย
+        └── lang/                       ← extracted to plugins/HotkeyCommands/lang/ on first run
+            ├── en.yml                  ← English (default locale)
+            ├── zh.yml                  ← 简体中文
+            └── th.yml                  ← ไทย
 ```
 
 ---
@@ -204,18 +205,28 @@ Upgrade config เก่าที่ผู้ใช้แก้ไว้แบ�
 
 ## Lang Schema
 
-ไฟล์ที่ bundle มาด้วย: `lang_en.yml` (English, **default**), `lang_zh.yml` (简体中文), `lang_th.yml` (ไทย)
-— ทุกไฟล์มี key ชุดเดียวกัน ต้อง sync กันเมื่อเพิ่ม/แก้ message
+ไฟล์ bundle อยู่ใน `src/main/resources/lang/`: `en.yml` (English, **default**), `zh.yml` (简体中文),
+`th.yml` (ไทย) — ทุกไฟล์มี key ชุดเดียวกัน ต้อง sync กันเมื่อเพิ่ม/แก้ message
 
-Placeholders สำคัญ:
+**Runtime layout**: `LangManager.load` แตกไฟล์ทุก locale (`BUNDLED_LOCALES = {en,zh,th}`) ลงโฟลเดอร์
+`plugins/HotkeyCommands/lang/` ตอนรันครั้งแรก (ไม่ทับไฟล์ที่ user แก้แล้ว) เพื่อให้เห็น/แก้ได้ทุกภาษา แล้ว
+โหลด `lang/<locale>.yml` ตาม config — ถ้าไม่มี fallback เป็น `lang/en.yml`
+- **Migration**: `migrateFlatLangFiles` ย้ายไฟล์รูปแบบเก่า `lang_<code>.yml` (เวอร์ชันก่อนหน้าวางไว้ที่ราก
+  data folder) เข้า `lang/` — ถ้า `lang/<code>.yml` มีอยู่แล้วจะลบตัวเก่าทิ้ง (redundant), ถ้ายังไม่มีจะ rename
+  ย้ายเข้าไป (รักษา edit ของ user) — fresh install = no-op
+
+Placeholders สำคัญ (ใน message):
 - `{prefix}` — ถูก inject ทุก key อัตโนมัติ
 - `{remaining}` — ใน `on-cooldown`
 - `{id}`, `{key}`, `{command}`, `{status}` — ใน `list-entry`, `info-*`
 - `{run_as}`, `{cancel}`, `{permission}` — ใน `info-*`
 
-เพิ่มภาษาใหม่: สร้างไฟล์ `lang_<locale>.yml` ใน `src/main/resources/`
-แล้วเปลี่ยน `locale:` ใน config.yml — ถ้า locale file ไม่มีจะ fallback เป็น `lang_en.yml`
-(`LangManager.load` + default ใน `ConfigManager` = `en`)
+**Command placeholder** (คนละชุดกับ message ข้างบน): `{player}` ใน `command`/`commands` ถูกแทนด้วยชื่อ
+ผู้เล่นที่ trigger ก่อน dispatch (`HotkeyManager` — `cmd.replace("{player}", playerName)`) หลัก ๆ ไว้ให้
+`run-as: CONSOLE` ยิงคำสั่งที่ต้องระบุ target ได้ เช่น `/heal {player}`
+
+เพิ่มภาษาใหม่: สร้างไฟล์ `src/main/resources/lang/<locale>.yml` (+ เพิ่มใน `BUNDLED_LOCALES` ถ้าอยากให้
+แตกออกมาอัตโนมัติ) แล้วเปลี่ยน `locale:` ใน config.yml — default ใน `ConfigManager` = `en`
 
 > **หมายเหตุ**: `no-permission` และ `hotkey-disabled` มีใน lang ไฟล์แต่ **ยังไม่ถูกส่งจาก code**
 > (permission fail = silent ตาม design) — เก็บไว้เผื่ออนาคต
@@ -259,7 +270,7 @@ Java 21+ required (Maven 4 + JDK 24 ทดสอบแล้ว — ใช้ไ
 
 1. วาง **PacketEvents** jar ก่อน (`plugins/`)
 2. วาง **HotkeyCommands** jar
-3. Restart server → `config.yml` + `lang_th.yml` ถูกสร้างอัตโนมัติ
+3. Restart server → `config.yml` + โฟลเดอร์ `lang/` (en/zh/th.yml) ถูกสร้างอัตโนมัติ
 
 ---
 

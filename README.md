@@ -19,8 +19,10 @@ Built on [PacketEvents](https://github.com/retrooper/packetevents) and works on
 - 🔗 **Multi-key** — one entry can trigger on several keys (`keys: [SWAP_HAND, DROP]`).
 - ⛓️ **Multi-command** — one keypress can run several commands in order (`commands: [...]`).
 - 🚫 **Cancel the vanilla action** — e.g. press Ctrl+Q to open a shop *without* dropping your stack.
-- 👤 **Run as player or console** — per hotkey (`run-as: PLAYER | CONSOLE`).
-- 🌍 **Multi-language** — English (default), 简体中文, ไทย; unknown locale falls back to English.
+- 👤 **Run as player or console** — per hotkey (`run-as: PLAYER | CONSOLE`); use `{player}` in a
+  command to insert the triggering player's name (handy for console-run commands like `/heal {player}`).
+- 🌍 **Multi-language** — English (default), 简体中文, ไทย, all extracted into a `lang/` folder you can
+  edit; unknown locale falls back to English.
 - 🛡️ **Anti-flood** — global cooldown plus a hard 50 ms dispatch floor that can't be disabled.
 - 🧵 **Folia-aware** — commands dispatch on the correct region/main thread automatically.
 - ♻️ **Safe config upgrades** — new settings are merged into an edited `config.yml` without
@@ -91,6 +93,22 @@ hotkeys:
 `key` / `keys` and `command` / `commands` each accept either a single value or a list.
 Leaving `commands` empty with `cancel-action: true` makes a hotkey that only **blocks** the
 vanilla action and runs nothing.
+
+### How the command runs (`run-as`)
+
+| Value | Behaviour |
+|---|---|
+| `PLAYER` (default) | Runs **as if the player typed it** — checked against the player's own permissions, so it won't work if they lack the command's permission. Use for normal player commands (`/spawn`, `/home`). |
+| `CONSOLE` | Runs **as the server console** with full privileges, bypassing the player's permissions — use it to let players trigger commands they normally couldn't. A CONSOLE hotkey **must** set a `permission` (the permission to *use the hotkey*), or it is refused at load. |
+
+Use **`{player}`** anywhere in a command to insert the triggering player's name — mainly so a
+console command can target them, e.g. `command: "/heal {player}"`.
+
+### Language files
+
+The `en`, `zh`, and `th` language files are written into a **`lang/` folder** inside the plugin
+directory on first run. Edit any of them, then pick one with `locale:` in `config.yml`. Drop your
+own `lang/<code>.yml` to add a language; an unknown locale falls back to `lang/en.yml`.
 
 ---
 

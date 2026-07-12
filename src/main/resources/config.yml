@@ -2,9 +2,9 @@
 #  HotkeyCommands  –  config.yml
 # =============================================
 
-# Language file to load  →  lang_<locale>.yml  inside the plugin folder
-# Bundled: en (English, default), zh (简体中文), th (ไทย)
-# An unknown locale falls back to English. Add your own by dropping a lang_<code>.yml in this folder.
+# Language file to load  →  lang/<locale>.yml  inside the plugin folder
+# Bundled in the lang/ folder: en (English, default), zh (简体中文), th (ไทย)
+# An unknown locale falls back to English. Add your own by dropping a lang/<code>.yml in that folder.
 locale: en
 
 # Cooldown (seconds) shared across all hotkeys per player  |  0 = disabled
@@ -57,12 +57,18 @@ ignore-bedrock: true
 #   true  – cancel the vanilla game action (item won't swap / drop / slot won't change)
 #   false – vanilla action still happens AND the command runs
 #
-# run-as:
-#   PLAYER  – command runs with the player's own permissions
-#   CONSOLE – command runs as console (full server privileges).
-#             SECURITY: a CONSOLE hotkey MUST have a non-empty 'permission'.
-#             Without one it would let any player run console commands, so the
-#             plugin refuses to load such an entry (see console on startup).
+# run-as:  (HOW the command is executed)
+#   PLAYER  – exactly as if the PLAYER typed the command in chat. The command is
+#             checked against the player's own permissions, so if they lack the
+#             permission for that command it just won't work. Use this for normal
+#             commands players are allowed to run (/spawn, /home, /warps, …).
+#   CONSOLE – runs as the server CONSOLE (full privileges). Almost every command
+#             works regardless of the player's permissions — use it to let players
+#             trigger commands they normally couldn't (e.g. /give, /gamemode, /kit).
+#             SECURITY: a CONSOLE hotkey MUST have a non-empty 'permission' (this is
+#             the permission to USE the hotkey, not to run the command). Without one
+#             any player could run console commands, so the plugin refuses to load
+#             such an entry (see console on startup).
 # ------------------------------------------------------------------
 hotkeys:
 
@@ -131,3 +137,16 @@ hotkeys:
   #   enabled: false
   #   cancel-action: true
   #   run-as: PLAYER
+
+  # Example – run-as CONSOLE: let a player trigger a command they normally can't.
+  # Here /heal usually needs op/permission, but running it as console bypasses that —
+  # any player WITH the hotkey permission below can heal themselves on Shift+F.
+  # {player} is replaced with the triggering player's name, so the console command can
+  # target them. (CONSOLE requires a permission node, or the plugin refuses to load it.)
+  # console_heal:
+  #   key: SNEAK_SWAP_HAND
+  #   command: "/heal {player}"
+  #   permission: hkcmd.key.console_heal
+  #   enabled: false
+  #   cancel-action: true
+  #   run-as: CONSOLE
