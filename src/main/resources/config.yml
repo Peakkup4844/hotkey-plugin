@@ -54,6 +54,12 @@ ignore-bedrock: true
 #     - "spawn"
 #     - "heal"
 #   (Leave commands empty + cancel-action: true to only BLOCK the vanilla action.)
+#   NOTE (menu plugins like DeluxeMenus): commands that are dynamically-registered
+#     aliases (e.g. DeluxeMenus open_command: [menu, warps] makes a /warps alias) can
+#     clash with another plugin's command or resolve unreliably here — the hotkey fires
+#     but the command silently fails. Prefer the plugin's BUILT-IN command instead of
+#     the alias, e.g. command: "dm open <menuId>" for DeluxeMenus. Set debug: true to
+#     see dispatch failures printed to console.
 #
 # permission:  (WHO may use the hotkey)
 #   A permission node (e.g. hkcmd.key.warp_menu) that the player must have.

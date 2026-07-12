@@ -99,6 +99,14 @@ Write commands **without a leading slash** (`warps`, not `/warps`) — it's hand
 (a stray `/` is tolerated). Leaving `commands` empty with `cancel-action: true` makes a hotkey
 that only **blocks** the vanilla action and runs nothing.
 
+> **Menu-plugin commands (DeluxeMenus etc.).** Some plugins register command *aliases* dynamically
+> (e.g. DeluxeMenus' `open_command: [menu, warps]` creates a `/warps` alias). Those aliases can
+> clash with a command another plugin already owns, or resolve unreliably when triggered this way —
+> the hotkey then fires but the command silently fails. If a hotkey does nothing while the same
+> command works when typed in chat, prefer the plugin's **built-in** command instead of the alias
+> (for DeluxeMenus: `command: "dm open <menuId>"`). Turn on `debug: true` to see dispatch failures
+> logged to console.
+
 ### How the command runs (`run-as`)
 
 | Value | Behaviour |
