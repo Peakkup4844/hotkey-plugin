@@ -3,7 +3,8 @@
 # =============================================
 
 # Language file to load  →  lang/<locale>.yml  inside the plugin folder
-# Bundled in the lang/ folder: en (English, default), zh (简体中文), th (ไทย), es (Español), ru (Русский)
+# Bundled in the lang/ folder: en (English, default), zh (简体中文), th (ไทย), es (Español),
+#   ru (Русский), vi (Tiếng Việt), id (Bahasa Indonesia), ko (한국어)
 # An unknown locale falls back to English. Add your own by dropping a lang/<code>.yml in that folder.
 locale: en
 

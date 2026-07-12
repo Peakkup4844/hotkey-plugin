@@ -21,8 +21,9 @@ Built on [PacketEvents](https://github.com/retrooper/packetevents) and works on
 - 🚫 **Cancel the vanilla action** — e.g. press Ctrl+Q to open a shop *without* dropping your stack.
 - 👤 **Run as player or console** — per hotkey (`run-as: PLAYER | CONSOLE`); use `{player}` in a
   command to insert the triggering player's name (handy for console-run commands like `heal {player}`).
-- 🌍 **Multi-language** — English (default), 简体中文, ไทย, Español, Русский, all extracted into a
-  `lang/` folder you can edit; unknown locale falls back to English.
+- 🌍 **Multi-language** — English (default), 简体中文, ไทย, Español, Русский, Tiếng Việt,
+  Bahasa Indonesia, 한국어, all extracted into a `lang/` folder you can edit; unknown locale falls
+  back to English.
 - 🛡️ **Anti-flood** — global cooldown plus a hard 50 ms dispatch floor that can't be disabled.
 - 🧵 **Folia-aware** — commands dispatch on the correct region/main thread automatically.
 - ♻️ **Safe config upgrades** — new settings are merged into an edited `config.yml` without
@@ -55,7 +56,7 @@ Built on [PacketEvents](https://github.com/retrooper/packetevents) and works on
 ## Configuration
 
 ```yaml
-locale: en              # en | zh | th | es | ru | <custom>
+locale: en              # en | zh | th | es | ru | vi | id | ko | <custom>
 global-cooldown: 1.5    # seconds shared across all hotkeys per player (0 = off)
 debug: false
 ignore-bedrock: true    # skip Bedrock players (Floodgate only)
@@ -107,9 +108,10 @@ console command can target them, e.g. `command: "heal {player}"`.
 
 ### Language files
 
-The `en`, `zh`, `th`, `es`, and `ru` language files are written into a **`lang/` folder** inside the
-plugin directory on first run. Edit any of them, then pick one with `locale:` in `config.yml`. Drop
-your own `lang/<code>.yml` to add a language; an unknown locale falls back to `lang/en.yml`.
+The `en`, `zh`, `th`, `es`, `ru`, `vi`, `id`, and `ko` language files are written into a **`lang/`
+folder** inside the plugin directory on first run. Edit any of them, then pick one with `locale:` in
+`config.yml`. Drop your own `lang/<code>.yml` to add a language; an unknown locale falls back to
+`lang/en.yml`.
 
 ---
 

@@ -1,0 +1,44 @@
+# =============================================
+#  HotkeyCommands  –  lang/id.yml  (Bahasa Indonesia / Indonesian)
+#  Kode warna: gunakan & diikuti kode warna Minecraft
+#  Placeholder ditampilkan di bawah setiap kunci
+# =============================================
+
+prefix: "&8[&6HotKey&8] &r"
+
+# Dikirim saat pemain tidak punya izin yang diperlukan untuk sebuah hotkey  (saat ini senyap — tidak ditampilkan dalam game)
+no-permission: "{prefix}&cKamu tidak punya izin untuk memakai hotkey ini"
+
+# Dikirim saat pemain memicu hotkey sebelum cooldown berakhir
+# Placeholder: {remaining} = sisa detik (mis. "0.8")
+on-cooldown: "{prefix}&eTunggu &f{remaining}s &esebelum memakainya lagi"
+
+# Dikirim saat entri hotkey memiliki enabled: false
+hotkey-disabled: "{prefix}&7Hotkey ini dinonaktifkan"
+
+# --- Pesan admin ---
+
+reload-success: "{prefix}&aKonfigurasi berhasil dimuat ulang"
+reload-fail: "{prefix}&cGagal memuat ulang konfigurasi — lihat konsol untuk detail"
+
+list-header: "{prefix}&eSemua hotkey:"
+# Placeholder: {id}, {key}, {command}, {status}
+list-entry: "  &7» &f{id} &8| &e{key} &8→ &a{command} &8[{status}]"
+list-status-enabled: "&aaktif"
+list-status-disabled: "&cnonaktif"
+no-hotkeys: "{prefix}&7Belum ada hotkey yang terdaftar"
+
+# Placeholder: {id}
+info-header: "{prefix}&eInfo hotkey &f{id}&e:"
+# Placeholder untuk baris info: {key}, {command}, {permission}, {cancel}, {run_as}, {status}
+info-key: "  &7Tombol&8: &f{key}"
+info-command: "  &7Perintah&8: &f{command}"
+info-permission: "  &7Izin&8: &f{permission}"
+info-cancel: "  &7Batalkan aksi&8: &f{cancel}"
+info-run-as: "  &7Jalankan sebagai&8: &f{run_as}"
+info-status: "  &7Status&8: {status}"
+# Placeholder: {id}
+info-not-found: "{prefix}&cHotkey &f'{id}' &ctidak ditemukan"
+
+admin-no-permission: "{prefix}&cKamu tidak punya izin untuk memakai perintah ini"
+usage: "{prefix}&7Penggunaan&8: &f/hkcmd <reload|list|info <id>>"

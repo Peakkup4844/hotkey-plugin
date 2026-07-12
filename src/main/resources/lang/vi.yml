@@ -1,0 +1,44 @@
+# =============================================
+#  HotkeyCommands  –  lang/vi.yml  (Tiếng Việt / Vietnamese)
+#  Mã màu: dùng & theo sau là mã màu của Minecraft
+#  Các chỗ thay thế được ghi bên dưới mỗi khóa
+# =============================================
+
+prefix: "&8[&6HotKey&8] &r"
+
+# Gửi khi người chơi không có quyền cần thiết cho phím tắt  (hiện đang im lặng — không hiển thị trong game)
+no-permission: "{prefix}&cBạn không có quyền dùng phím tắt này"
+
+# Gửi khi người chơi kích hoạt phím tắt trước khi hết thời gian hồi
+# Chỗ thay thế: {remaining} = số giây còn lại (ví dụ "0.8")
+on-cooldown: "{prefix}&eChờ &f{remaining}s &etrước khi dùng lại"
+
+# Gửi khi một mục phím tắt có enabled: false
+hotkey-disabled: "{prefix}&7Phím tắt này đã bị tắt"
+
+# --- Tin nhắn quản trị ---
+
+reload-success: "{prefix}&aĐã tải lại cấu hình thành công"
+reload-fail: "{prefix}&cTải lại cấu hình thất bại — xem console để biết chi tiết"
+
+list-header: "{prefix}&eTất cả phím tắt:"
+# Chỗ thay thế: {id}, {key}, {command}, {status}
+list-entry: "  &7» &f{id} &8| &e{key} &8→ &a{command} &8[{status}]"
+list-status-enabled: "&abật"
+list-status-disabled: "&ctắt"
+no-hotkeys: "{prefix}&7Chưa có phím tắt nào được đăng ký"
+
+# Chỗ thay thế: {id}
+info-header: "{prefix}&eThông tin phím tắt &f{id}&e:"
+# Chỗ thay thế cho các dòng info: {key}, {command}, {permission}, {cancel}, {run_as}, {status}
+info-key: "  &7Phím&8: &f{key}"
+info-command: "  &7Lệnh&8: &f{command}"
+info-permission: "  &7Quyền&8: &f{permission}"
+info-cancel: "  &7Hủy hành động&8: &f{cancel}"
+info-run-as: "  &7Chạy dưới danh nghĩa&8: &f{run_as}"
+info-status: "  &7Trạng thái&8: {status}"
+# Chỗ thay thế: {id}
+info-not-found: "{prefix}&cKhông tìm thấy phím tắt &f'{id}'"
+
+admin-no-permission: "{prefix}&cBạn không có quyền dùng lệnh này"
+usage: "{prefix}&7Cách dùng&8: &f/hkcmd <reload|list|info <id>>"

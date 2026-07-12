@@ -1,0 +1,44 @@
+# =============================================
+#  HotkeyCommands  –  lang/ko.yml  (한국어 / Korean)
+#  색상 코드: & 뒤에 Minecraft 색상 코드를 붙여 사용
+#  자리표시자는 각 키 아래에 표시됩니다
+# =============================================
+
+prefix: "&8[&6HotKey&8] &r"
+
+# 플레이어가 단축키에 필요한 권한이 없을 때 전송  (현재는 조용히 처리 — 게임 내 표시 없음)
+no-permission: "{prefix}&c이 단축키를 사용할 권한이 없습니다"
+
+# 쿨다운이 끝나기 전에 단축키를 사용했을 때 전송
+# 자리표시자: {remaining} = 남은 초 (예: "0.8")
+on-cooldown: "{prefix}&e&f{remaining}초 &e후에 다시 사용하세요"
+
+# 단축키 항목이 enabled: false 일 때 전송
+hotkey-disabled: "{prefix}&7이 단축키는 비활성화되어 있습니다"
+
+# --- 관리자 메시지 ---
+
+reload-success: "{prefix}&a설정을 성공적으로 다시 불러왔습니다"
+reload-fail: "{prefix}&c설정 다시 불러오기 실패 — 자세한 내용은 콘솔을 확인하세요"
+
+list-header: "{prefix}&e모든 단축키:"
+# 자리표시자: {id}, {key}, {command}, {status}
+list-entry: "  &7» &f{id} &8| &e{key} &8→ &a{command} &8[{status}]"
+list-status-enabled: "&a켜짐"
+list-status-disabled: "&c꺼짐"
+no-hotkeys: "{prefix}&7아직 등록된 단축키가 없습니다"
+
+# 자리표시자: {id}
+info-header: "{prefix}&e단축키 정보 &f{id}&e:"
+# info 줄의 자리표시자: {key}, {command}, {permission}, {cancel}, {run_as}, {status}
+info-key: "  &7키&8: &f{key}"
+info-command: "  &7명령어&8: &f{command}"
+info-permission: "  &7권한&8: &f{permission}"
+info-cancel: "  &7동작 취소&8: &f{cancel}"
+info-run-as: "  &7실행 주체&8: &f{run_as}"
+info-status: "  &7상태&8: {status}"
+# 자리표시자: {id}
+info-not-found: "{prefix}&c단축키 &f'{id}'&c을(를) 찾을 수 없습니다"
+
+admin-no-permission: "{prefix}&c이 명령어를 사용할 권한이 없습니다"
+usage: "{prefix}&7사용법&8: &f/hkcmd <reload|list|info <id>>"

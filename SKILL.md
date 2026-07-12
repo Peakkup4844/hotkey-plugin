@@ -37,7 +37,10 @@ hotkey-plugin/
             ├── zh.yml                  ← 简体中文
             ├── th.yml                  ← ไทย
             ├── es.yml                  ← Español
-            └── ru.yml                  ← Русский
+            ├── ru.yml                  ← Русский
+            ├── vi.yml                  ← Tiếng Việt
+            ├── id.yml                  ← Bahasa Indonesia
+            └── ko.yml                  ← 한국어
 ```
 
 ---
@@ -162,7 +165,7 @@ PacketEvents process บน Netty thread → ทุก command dispatch / messag
 
 ```yaml
 # config.yml
-locale: en             # en (default) | zh | th | es | ru | <custom>  — unknown → fallback en
+locale: en             # en (default) | zh | th | es | ru | vi | id | ko | <custom>  — unknown → fallback en
 global-cooldown: 1.5   # วินาที, 0 = ปิด (มี hard floor 50ms บังคับเสมอ)
 debug: false
 ignore-bedrock: true   # ข้ามผู้เล่น Bedrock (Geyser/Floodgate) — default true
@@ -209,9 +212,10 @@ Upgrade config เก่าที่ผู้ใช้แก้ไว้แบ�
 ## Lang Schema
 
 ไฟล์ bundle อยู่ใน `src/main/resources/lang/`: `en.yml` (English, **default**), `zh.yml` (简体中文),
-`th.yml` (ไทย), `es.yml` (Español), `ru.yml` (Русский) — ทุกไฟล์มี key ชุดเดียวกัน ต้อง sync กันเมื่อเพิ่ม/แก้ message
+`th.yml` (ไทย), `es.yml` (Español), `ru.yml` (Русский), `vi.yml` (Tiếng Việt), `id.yml` (Bahasa Indonesia),
+`ko.yml` (한국어) — ทุกไฟล์มี key ชุดเดียวกัน ต้อง sync กันเมื่อเพิ่ม/แก้ message
 
-**Runtime layout**: `LangManager.load` แตกไฟล์ทุก locale (`BUNDLED_LOCALES = {en,zh,th,es,ru}`) ลงโฟลเดอร์
+**Runtime layout**: `LangManager.load` แตกไฟล์ทุก locale (`BUNDLED_LOCALES = {en,zh,th,es,ru,vi,id,ko}`) ลงโฟลเดอร์
 `plugins/HotkeyCommands/lang/` ตอนรันครั้งแรก (ไม่ทับไฟล์ที่ user แก้แล้ว) เพื่อให้เห็น/แก้ได้ทุกภาษา แล้ว
 โหลด `lang/<locale>.yml` ตาม config — ถ้าไม่มี fallback เป็น `lang/en.yml`
 - **Migration**: `migrateFlatLangFiles` ย้ายไฟล์รูปแบบเก่า `lang_<code>.yml` (เวอร์ชันก่อนหน้าวางไว้ที่ราก

@@ -17,7 +17,7 @@ public class LangManager {
 
     // Locales shipped inside the jar. All of them are written into the lang/ folder on first run
     // so the admin can see every choice and edit any of them; 'locale' in config.yml picks one.
-    private static final String[] BUNDLED_LOCALES = {"en", "zh", "th", "es", "ru"};
+    private static final String[] BUNDLED_LOCALES = {"en", "zh", "th", "es", "ru", "vi", "id", "ko"};
 
     // Hot-swapped by load() on /hkcmd reload; read from main/region threads (on Folia a region
     // thread may be in send() when the main thread reloads). volatile = safe publication.
