@@ -42,3 +42,6 @@ Desktop.ini
 *.tmp
 hs_err_pid*.log
 replay_pid*.log
+
+# ===== Internal dev notes (not for the public repo) =====
+SKILL.md
